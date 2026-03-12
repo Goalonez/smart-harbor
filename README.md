@@ -2,18 +2,22 @@
 
 [中文](README.zh-CN.md)
 
-A self-hosted smart bookmark navigation page built with vibe coding. Auto-detects LAN/WAN environment and switches URLs accordingly.
+Your personal bookmark homepage that gets smarter with your network. Whether you're at home or on the go, Smart Harbor automatically shows the right links for your current location.
 
-## Features
+## What Makes It Smart
 
-- Auto-detect LAN / WAN and switch between primary and secondary URLs
-- Visual bookmark editor with drag-and-drop ordering, icon picker, and JSON mode
-- WebDAV backup with scheduled auto-backup and version restore
-- Admin authentication with scrypt password hashing
-- Dark mode and responsive layout
-- Single `config.json` file for all configuration — easy to back up and restore
+- **Location-aware bookmarks**: Automatically switches between home and external URLs based on your network
+- **Visual bookmark manager**: Drag-and-drop organization with beautiful icons and categories
+- **Cloud backup**: Keep your bookmarks safe with WebDAV sync and automatic backups
+- **Secure access**: Password-protected admin panel with smart lockout protection
+- **Beautiful interface**: Dark mode support and mobile-friendly design
+- **Simple setup**: Everything stored in one config file - easy to backup and restore
 
 ## Quick Start
+
+### Option 1: Docker Run (Simple)
+
+Perfect for trying out Smart Harbor quickly:
 
 ```bash
 docker run -d \
@@ -23,22 +27,62 @@ docker run -d \
   goalonez/smart-harbor:latest
 ```
 
-Open `http://localhost:8080` and create your admin account on first visit.
+### Option 2: Docker Compose (Recommended)
 
-All configuration is stored in the mounted `config/config.json`.
+For production use with better resource management:
 
-## Configuration
+```bash
+# Download the compose file
+curl -O https://raw.githubusercontent.com/goalonez/smart-harbor/main/docker-compose.yml
 
-The app generates a default `config.json` on first startup. Key sections:
+# Start the service
+docker compose up -d
+```
 
-| Field | Description |
-|-------|-------------|
-| `system.appName` | Page title |
-| `system.darkMode` | Enable dark mode |
-| `system.defaultSearchEngine` | Default search engine ID |
-| `system.customSearchEngines` | Custom search engine list |
-| `system.webdavBackup` | WebDAV remote backup settings |
-| `services` | Bookmark groups and items |
+Or create your own `docker-compose.yml`:
+
+```yaml
+services:
+  smart-harbor:
+    image: goalonez/smart-harbor:latest
+    container_name: smart-harbor
+    ports:
+      - 8080:80
+    volumes:
+      - ./config:/app/config
+      # Alternative paths (uncomment one if needed):
+      # - ~/docker/smart-harbor/config:/app/config  # Home directory
+      # - /data/docker/smart-harbor/config:/app/config  # System data directory
+    restart: unless-stopped
+    networks:
+      - defaultnet
+    mem_limit: 4g
+    cpus: 3
+
+networks:
+  defaultnet:
+    external: true
+```
+
+### Getting Started
+
+1. Open `http://localhost:8080` in your browser
+2. Create your admin account on first visit
+3. Start adding your bookmarks and organizing them into categories
+
+Your settings and bookmarks are automatically saved to the mounted config folder.
+
+## Customization
+
+Smart Harbor creates a `config.json` file when you first start it. This file contains all your settings and bookmarks:
+
+| Setting | What it does |
+|---------|--------------|
+| `system.appName` | Change the page title to your liking |
+| `system.darkMode` | Toggle between light and dark themes |
+| `system.defaultSearchEngine` | Set your preferred search engine |
+| `system.webdavBackup` | Configure automatic cloud backups |
+| `services` | Your bookmark categories and links |
 
 <details>
 <summary>Example config.json</summary>
@@ -78,11 +122,17 @@ The app generates a default `config.json` on first startup. Key sections:
 
 </details>
 
-## Authentication
+## Managing Your Account
 
-- First visit: create an admin account (when `system.auth` is missing)
-- Password reset: remove `system.auth` from `config.json` and reload
-- Lockout: 5 failed attempts → 30 min lockout
+### First Time Setup
+When you first visit Smart Harbor, you'll be guided through creating an admin account. This keeps your bookmarks private and secure.
+
+### Forgot Your Password?
+No worries! Just remove the `system.auth` section from your `config.json` file and refresh the page. You'll be able to create a new password.
+
+### Security Features
+- After 5 failed login attempts, access is locked for 30 minutes
+- Passwords are securely hashed and never stored in plain text
 
 ## Development
 
