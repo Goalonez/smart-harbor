@@ -1,0 +1,20 @@
+services:
+  smart-harbor:
+    image: goalonez/smart-harbor:latest
+    container_name: smart-harbor
+    ports:
+      - 8080:80
+    volumes:
+      - ./config:/app/config
+      # Alternative paths (uncomment one if needed):
+      # - ~/docker/smart-harbor/config:/app/config  # Home directory
+      # - /data/docker/smart-harbor/config:/app/config  # System data directory
+    restart: unless-stopped
+    networks:
+      - defaultnet
+    mem_limit: 4g
+    cpus: 3
+
+networks:
+  defaultnet:
+    external: true
