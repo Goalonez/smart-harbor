@@ -1,0 +1,289 @@
+// @vitest-environment node
+
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { AppConfig, SystemConfig } from '../src/config/schema.js'
+
+let tempConfigDir = ''
+let app: Awaited<ReturnType<(typeof import('./app.js'))['buildServer']>> | null = null
+
+async function buildTestServer() {
+  vi.resetModules()
+  process.env.CONFIG_DIR = tempConfigDir
+  process.env.NODE_ENV = 'test'
+  const { buildServer } = await import('./app.js')
+  app = await buildServer()
+  return app
+}
+
+async function readStoredConfig() {
+  const text = await readFile(path.join(tempConfigDir, 'config.json'), 'utf8')
+  return JSON.parse(text) as AppConfig
+}
+
+function getSessionCookie(response: {
+  headers: {
+    'set-cookie'?: string | string[]
+  }
+}) {
+  const header = response.headers['set-cookie']
+  const value = Array.isArray(header) ? header[0] : header
+
+  expect(value).toBeTruthy()
+  return value!.split(';')[0]
+}
+
+async function setupAdmin(server: NonNullable<typeof app>, username = 'admin-user') {
+  const password = 'strong-password-123'
+  const response = await server.inject({
+    method: 'POST',
+    url: '/api/auth/setup',
+    payload: {
+      username,
+      password,
+    },
+  })
+
+  expect(response.statusCode).toBe(200)
+
+  return {
+    username,
+    password,
+    cookie: getSessionCookie(response),
+  }
+}
+
+describe('auth module', () => {
+  beforeEach(async () => {
+    tempConfigDir = await mkdtemp(path.join(os.tmpdir(), 'smart-harbor-auth-'))
+  })
+
+  afterEach(async () => {
+    delete process.env.CONFIG_DIR
+    delete process.env.NODE_ENV
+
+    if (app) {
+      await app.close()
+      app = null
+    }
+
+    if (tempConfigDir) {
+      await rm(tempConfigDir, { recursive: true, force: true })
+      tempConfigDir = ''
+    }
+  })
+
+  it('requires setup before access and stores only a password hash', async () => {
+    const server = await buildTestServer()
+
+    const statusResponse = await server.inject({
+      method: 'GET',
+      url: '/api/auth/status',
+    })
+
+    expect(statusResponse.statusCode).toBe(200)
+    expect(statusResponse.json()).toEqual({
+      setupRequired: true,
+      authenticated: false,
+    })
+
+    const blockedResponse = await server.inject({
+      method: 'GET',
+      url: '/api/config/system',
+    })
+
+    expect(blockedResponse.statusCode).toBe(428)
+    expect(blockedResponse.body).toContain('请先创建管理员账号')
+
+    const { cookie } = await setupAdmin(server)
+    const storedConfig = await readStoredConfig()
+
+    expect(storedConfig.system.auth?.username).toBe('admin-user')
+    expect(storedConfig.system.auth?.passwordHash).toMatch(/^scrypt\$/)
+    expect(storedConfig.system.auth?.passwordHash).not.toBe('strong-password-123')
+
+    const publicSystemResponse = await server.inject({
+      method: 'GET',
+      url: '/api/config/system',
+      headers: { cookie },
+    })
+    const publicAppResponse = await server.inject({
+      method: 'GET',
+      url: '/api/config/app',
+      headers: { cookie },
+    })
+
+    expect(publicSystemResponse.statusCode).toBe(200)
+    expect((publicSystemResponse.json() as SystemConfig & { auth?: unknown }).auth).toBeUndefined()
+    expect(publicAppResponse.statusCode).toBe(200)
+    expect((publicAppResponse.json() as AppConfig).system.auth).toBeUndefined()
+
+    const healthResponse = await server.inject({
+      method: 'GET',
+      url: '/api/health',
+    })
+
+    expect(healthResponse.statusCode).toBe(200)
+    expect(healthResponse.json()).toEqual({ ok: true })
+  })
+
+  it('preserves stored auth when saving sanitized config payloads', async () => {
+    const server = await buildTestServer()
+    const { cookie } = await setupAdmin(server)
+    const originalConfig = await readStoredConfig()
+
+    const appResponse = await server.inject({
+      method: 'GET',
+      url: '/api/config/app',
+      headers: { cookie },
+    })
+    const publicApp = appResponse.json() as AppConfig
+
+    const saveAppResponse = await server.inject({
+      method: 'PUT',
+      url: '/api/config/app',
+      headers: { cookie },
+      payload: {
+        ...publicApp,
+        system: {
+          ...publicApp.system,
+          appName: 'Secured Harbor',
+        },
+      },
+    })
+
+    expect(saveAppResponse.statusCode).toBe(200)
+    expect((saveAppResponse.json() as AppConfig).system.auth).toBeUndefined()
+
+    const systemResponse = await server.inject({
+      method: 'GET',
+      url: '/api/config/system',
+      headers: { cookie },
+    })
+    const publicSystem = systemResponse.json() as SystemConfig
+
+    const saveSystemResponse = await server.inject({
+      method: 'PUT',
+      url: '/api/config/system',
+      headers: { cookie },
+      payload: {
+        ...publicSystem,
+        darkMode: !publicSystem.darkMode,
+      },
+    })
+
+    expect(saveSystemResponse.statusCode).toBe(200)
+    expect((saveSystemResponse.json() as SystemConfig & { auth?: unknown }).auth).toBeUndefined()
+
+    const storedConfig = await readStoredConfig()
+    expect(storedConfig.system.auth).toEqual(originalConfig.system.auth)
+    expect(storedConfig.system.appName).toBe('Secured Harbor')
+    expect(storedConfig.system.darkMode).toBe(!publicSystem.darkMode)
+  })
+
+  it('rejects invalid logins, rate limits repeated failures, and rotates sessions on credential updates', async () => {
+    const server = await buildTestServer()
+    const { password } = await setupAdmin(server)
+
+    const wrongLoginResponse = await server.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        username: 'admin-user',
+        password: 'wrong-password-999',
+      },
+    })
+
+    expect(wrongLoginResponse.statusCode).toBe(401)
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const response = await server.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: {
+          username: 'admin-user',
+          password: 'wrong-password-999',
+        },
+      })
+
+      expect(response.statusCode).toBe(401)
+    }
+
+    const limitedResponse = await server.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        username: 'admin-user',
+        password: 'wrong-password-999',
+      },
+    })
+
+    expect(limitedResponse.statusCode).toBe(429)
+
+    await server.close()
+    app = null
+
+    const freshServer = await buildTestServer()
+    const validLoginResponse = await freshServer.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        username: 'admin-user',
+        password,
+      },
+    })
+
+    expect(validLoginResponse.statusCode).toBe(200)
+    const oldCookie = getSessionCookie(validLoginResponse)
+
+    const updateResponse = await freshServer.inject({
+      method: 'PUT',
+      url: '/api/auth/credentials',
+      headers: { cookie: oldCookie },
+      payload: {
+        currentPassword: password,
+        nextUsername: 'harbor-admin',
+        nextPassword: 'new-strong-password-456',
+      },
+    })
+
+    expect(updateResponse.statusCode).toBe(200)
+    const newCookie = getSessionCookie(updateResponse)
+
+    const oldSessionResponse = await freshServer.inject({
+      method: 'GET',
+      url: '/api/config/system',
+      headers: { cookie: oldCookie },
+    })
+    const newSessionResponse = await freshServer.inject({
+      method: 'GET',
+      url: '/api/config/system',
+      headers: { cookie: newCookie },
+    })
+
+    expect(oldSessionResponse.statusCode).toBe(401)
+    expect(newSessionResponse.statusCode).toBe(200)
+
+    const oldCredentialsResponse = await freshServer.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        username: 'admin-user',
+        password,
+      },
+    })
+    const newCredentialsResponse = await freshServer.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: {
+        username: 'harbor-admin',
+        password: 'new-strong-password-456',
+      },
+    })
+
+    expect(oldCredentialsResponse.statusCode).toBe(401)
+    expect(newCredentialsResponse.statusCode).toBe(200)
+  })
+})
