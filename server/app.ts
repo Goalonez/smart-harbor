@@ -59,7 +59,6 @@ function mergeAppAuth(
 }
 
 function applySecurityHeaders(reply: { header: (name: string, value: string) => unknown }) {
-  reply.header('X-Frame-Options', 'DENY')
   reply.header('X-Content-Type-Options', 'nosniff')
   reply.header('Referrer-Policy', 'same-origin')
 }

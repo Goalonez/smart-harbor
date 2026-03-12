@@ -134,6 +134,47 @@ No worries! Just remove the `system.auth` section from your `config.json` file a
 - After 5 failed login attempts, access is locked for 30 minutes
 - Passwords are securely hashed and never stored in plain text
 
+## Chrome New Tab Extension
+
+Smart Harbor can be paired with the built-in Chrome new tab extension in this repository. This is useful when you want Chrome to open your homepage directly in every new tab, while still supporting automatic switching between LAN and internet addresses.
+
+### What the extension does
+
+- Replaces Chrome's new tab page with Smart Harbor
+- Tries your primary URL first, then automatically switches to the fallback URL
+- Supports two opening modes:
+- `embedded`: opens Smart Harbor inside the new tab with a full-page iframe
+- `direct`: redirects the new tab directly to your Smart Harbor URL
+- Opens the extension settings page when you click the toolbar icon
+
+### Recommended setup
+
+Use this when you deploy Smart Harbor to both a local network address and a public address:
+
+- `Primary URL`: your preferred address, usually the faster LAN address
+- `Fallback URL`: the backup address, usually your internet-facing address
+- `Open Mode`: choose `embedded` if you want to stay inside the Chrome new tab page, or `direct` if you want pure URL navigation
+
+### Install the extension
+
+1. Download the extension package from GitHub Releases, or build it locally.
+2. Open `chrome://extensions`.
+3. Enable Developer mode.
+4. Click `Load unpacked`.
+5. Select the generated extension folder, for example `extension/smart-harbor-new-tab-v1.0.0`.
+
+### Build locally
+
+```bash
+npm run build:extension
+npm run package:extension
+```
+
+The packaged extension will be generated as:
+
+- folder: `extension/smart-harbor-new-tab-v<version>`
+- zip: `extension/smart-harbor-new-tab-v<version>.zip`
+
 ## Development
 
 ```bash

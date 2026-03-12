@@ -23,3 +23,6 @@ dist-ssr
 *.sw?
 dist-server
 /config
+extension/dist
+extension/smart-harbor-new-tab-v*
+extension/*.zip
