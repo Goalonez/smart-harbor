@@ -30,7 +30,8 @@ export function ServiceCard({
 
   async function openService(target: OpenTarget) {
     const urls = resolveTargetUrl(service, networkMode)
-    await openWithFallback(urls, { target })
+    const openTarget = service.forceNewTab ? 'blank' : target
+    await openWithFallback(urls, { target: openTarget })
   }
 
   const handleClick: HTMLAttributes<HTMLDivElement>['onClick'] = async (event) => {

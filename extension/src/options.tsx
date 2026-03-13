@@ -1,36 +1,62 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { getMessages } from '@extension/i18n'
 import { requestOriginPermissions } from '@extension/network'
 import {
+  DEFAULT_PROBE_TIMEOUT_MS,
+  defaultLanguage,
   defaultSettings,
+  normalizeProbeTimeoutMs,
   normalizeUrl,
+  readLanguage,
   readSettings,
+  RESOLUTION_CACHE_TTL_MS,
+  writeLanguage,
   writeSettings,
 } from '@extension/storage'
-import type { ExtensionSettings, OpenMode } from '@extension/types'
+import type { ExtensionLanguage, ExtensionSettings, OpenMode } from '@extension/types'
 import './styles.css'
 
 type SaveStatus =
-  | { tone: 'idle'; text: string }
-  | { tone: 'success'; text: string }
-  | { tone: 'warn'; text: string }
-  | { tone: 'error'; text: string }
+  | { tone: 'idle'; kind: 'idle' }
+  | { tone: 'success'; kind: 'saved' }
+  | { tone: 'warn'; kind: 'saved-no-permission' }
+  | { tone: 'error'; kind: 'invalid-url' | 'save-failed' }
+
+function getStatusText(language: ExtensionLanguage, status: SaveStatus) {
+  const messages = getMessages(language)
+
+  switch (status.kind) {
+    case 'idle':
+      return messages.options.statusIdle
+    case 'saved':
+      return messages.options.statusSaved
+    case 'saved-no-permission':
+      return messages.options.statusSavedNoPermission
+    case 'invalid-url':
+      return messages.options.statusInvalidUrl
+    case 'save-failed':
+      return messages.options.statusSaveFailed
+  }
+}
 
 export function OptionsApp() {
   const [form, setForm] = useState<ExtensionSettings>(defaultSettings)
-  const [status, setStatus] = useState<SaveStatus>({
-    tone: 'idle',
-    text: '填写主地址和切换地址后保存，新的标签页会按你的设置打开。',
-  })
+  const [language, setLanguage] = useState<ExtensionLanguage>(defaultLanguage)
+  const [status, setStatus] = useState<SaveStatus>({ tone: 'idle', kind: 'idle' })
   const [saving, setSaving] = useState(false)
+
+  const messages = getMessages(language)
+  const cacheSeconds = Math.round(RESOLUTION_CACHE_TTL_MS / 1000)
 
   useEffect(() => {
     let cancelled = false
 
     async function load() {
-      const settings = await readSettings()
+      const [settings, nextLanguage] = await Promise.all([readSettings(), readLanguage()])
       if (!cancelled) {
         setForm(settings)
+        setLanguage(nextLanguage)
       }
     }
 
@@ -50,6 +76,7 @@ export function OptionsApp() {
         primaryUrl: normalizeUrl(form.primaryUrl),
         fallbackUrl: normalizeUrl(form.fallbackUrl),
         openMode: form.openMode,
+        probeTimeoutMs: normalizeProbeTimeoutMs(form.probeTimeoutMs),
       }
 
       const permissionGranted = await requestOriginPermissions([
@@ -59,23 +86,16 @@ export function OptionsApp() {
 
       await writeSettings(nextSettings)
       setForm(nextSettings)
-
       setStatus(
         permissionGranted
-          ? {
-              tone: 'success',
-              text: '保存成功。插件现在可以检测主地址连通性，并在需要时自动切换。',
-            }
-          : {
-              tone: 'warn',
-              text: '配置已保存，但你拒绝了地址访问权限。新标签页仍可打开地址，只是无法稳定检测主地址是否可达。',
-            }
+          ? { tone: 'success', kind: 'saved' }
+          : { tone: 'warn', kind: 'saved-no-permission' }
       )
     } catch (error) {
-      const message = error instanceof Error ? error.message : '保存失败'
+      const message = error instanceof Error ? error.message : ''
       setStatus({
         tone: 'error',
-        text: message.includes('Invalid URL') ? '地址格式无效，请输入完整地址或 IP:端口。' : message,
+        kind: message.includes('Invalid URL') ? 'invalid-url' : 'save-failed',
       })
     } finally {
       setSaving(false)
@@ -93,62 +113,114 @@ export function OptionsApp() {
     updateField('openMode', mode)
   }
 
+  async function handleLanguageChange(nextLanguage: ExtensionLanguage) {
+    setLanguage(nextLanguage)
+    await writeLanguage(nextLanguage)
+  }
+
   return (
     <main className="page-shell settings-layout">
       <section className="settings-card panel">
         <div className="settings-head">
-          <div className="eyebrow">Smart Harbor Extension</div>
-          <h1>把导航页接到 Chrome 新标签页</h1>
-          <p className="hint">
-            插件只做地址接入与切换，不接管你的导航内容。主地址通常填写优先访问的地址，切换地址用于主地址不可用时自动兜底。
-          </p>
+          <div className="settings-head-top">
+            <div>
+              <div className="eyebrow">Smart Harbor Extension</div>
+              <h1>{messages.options.title}</h1>
+            </div>
+            <div
+              className="language-toggle"
+              role="group"
+              aria-label={messages.options.languageToggleAriaLabel}
+            >
+              <button
+                type="button"
+                className={language === 'zh-CN' ? 'active' : ''}
+                onClick={() => void handleLanguageChange('zh-CN')}
+              >
+                {messages.options.languageChinese}
+              </button>
+              <button
+                type="button"
+                className={language === 'en' ? 'active' : ''}
+                onClick={() => void handleLanguageChange('en')}
+              >
+                {messages.options.languageEnglish}
+              </button>
+            </div>
+          </div>
+          <p className="hint">{messages.options.subtitle}</p>
         </div>
 
         <form className="settings-grid" onSubmit={handleSubmit}>
           <div className="field">
-            <label htmlFor="primary-url">主地址</label>
+            <label htmlFor="primary-url">{messages.options.primaryUrlLabel}</label>
             <input
               id="primary-url"
               className="input"
-              placeholder="例如 http://localhost:3000 或 https://app.example.com"
+              placeholder={messages.options.primaryUrlPlaceholder}
               value={form.primaryUrl}
               onChange={(event) => updateField('primaryUrl', event.target.value)}
             />
-            <p className="field-help">新标签页会优先探测这个地址，探测成功后优先打开它。</p>
+            <p className="field-help">{messages.options.primaryUrlHint}</p>
           </div>
 
           <div className="field">
-            <label htmlFor="fallback-url">切换地址</label>
+            <label htmlFor="fallback-url">{messages.options.fallbackUrlLabel}</label>
             <input
               id="fallback-url"
               className="input"
-              placeholder="例如 https://backup.example.com"
+              placeholder={messages.options.fallbackUrlPlaceholder}
               value={form.fallbackUrl}
               onChange={(event) => updateField('fallbackUrl', event.target.value)}
             />
-            <p className="field-help">当主地址不通时，插件会自动切换到这里。</p>
+            <p className="field-help">{messages.options.fallbackUrlHint}</p>
           </div>
 
           <div className="field">
-            <label>打开方式</label>
-            <div className="toggle-group" role="tablist" aria-label="打开方式">
-              <button
-                type="button"
-                className={`toggle-option ${form.openMode === 'embedded' ? 'active' : ''}`}
-                onClick={() => setOpenMode('embedded')}
-              >
-                内嵌框架
-              </button>
+            <label>{messages.options.openModeLabel}</label>
+            <div
+              className="toggle-group"
+              role="tablist"
+              aria-label={messages.options.openModeAriaLabel}
+            >
               <button
                 type="button"
                 className={`toggle-option ${form.openMode === 'direct' ? 'active' : ''}`}
                 onClick={() => setOpenMode('direct')}
               >
-                直接跳转
+                {messages.options.openModeDirect}
+              </button>
+              <button
+                type="button"
+                className={`toggle-option ${form.openMode === 'embedded' ? 'active' : ''}`}
+                onClick={() => setOpenMode('embedded')}
+              >
+                {messages.options.openModeEmbedded}
               </button>
             </div>
+            <p className="field-help">{messages.options.openModeHint}</p>
+          </div>
+
+          <div className="field">
+            <label htmlFor="probe-timeout-ms">{messages.options.probeTimeoutLabel}</label>
+            <input
+              id="probe-timeout-ms"
+              type="number"
+              min={50}
+              max={5000}
+              step={50}
+              className="input"
+              value={form.probeTimeoutMs}
+              onChange={(event) => {
+                const nextValue = Number(event.target.value)
+                updateField(
+                  'probeTimeoutMs',
+                  Number.isFinite(nextValue) ? nextValue : DEFAULT_PROBE_TIMEOUT_MS
+                )
+              }}
+            />
             <p className="field-help">
-              开启内嵌框架时，新标签页会直接整页显示目标地址。关闭后会直接跳到导航页地址。
+              {messages.options.probeTimeoutHint(DEFAULT_PROBE_TIMEOUT_MS, cacheSeconds)}
             </p>
           </div>
 
@@ -156,10 +228,10 @@ export function OptionsApp() {
             <div
               className={`status-note ${status.tone === 'success' ? 'success' : ''} ${status.tone === 'error' ? 'error' : ''} ${status.tone === 'warn' ? 'warn' : ''}`}
             >
-              {status.text}
+              {getStatusText(language, status)}
             </div>
             <button className="btn btn-primary" type="submit" disabled={saving}>
-              {saving ? '保存中...' : '保存配置'}
+              {saving ? messages.options.savingButton : messages.options.saveButton}
             </button>
           </div>
         </form>

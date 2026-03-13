@@ -278,6 +278,36 @@ a {
   margin-bottom: 24px;
 }
 
+.settings-head-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.language-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.language-toggle button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: rgba(233, 240, 252, 0.82);
+  background: transparent;
+}
+
+.language-toggle button.active {
+  color: #06111f;
+  background: linear-gradient(135deg, #ffe2a7 0%, #ffb25f 100%);
+}
+
 .settings-grid {
   display: grid;
   gap: 18px;
@@ -378,6 +408,15 @@ a {
 
   .toggle-group {
     width: 100%;
+  }
+
+  .settings-head-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .language-toggle {
+    width: fit-content;
   }
 
   .settings-card,

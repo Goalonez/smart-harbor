@@ -5,6 +5,7 @@ interface ChromeStorageArea {
 
 interface ChromeStorageNamespace {
   sync: ChromeStorageArea
+  local: ChromeStorageArea
 }
 
 interface ChromePermissionsNamespace {

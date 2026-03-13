@@ -19,7 +19,10 @@ interface BookmarkFormProps {
   submitDisabled?: boolean
   onSubmit: () => void
   onCancel?: () => void
-  onFieldChange: (field: keyof BookmarkFormValues, value: string) => void
+  onFieldChange: <K extends keyof BookmarkFormValues>(
+    field: K,
+    value: BookmarkFormValues[K]
+  ) => void
 }
 
 export function BookmarkForm({
@@ -171,6 +174,36 @@ export function BookmarkForm({
               {messages.bookmarkForm.probesHint}
             </p>
           </label>
+
+          <div className="md:col-span-2">
+            <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/15 p-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="text-[13px] font-medium text-foreground">
+                  {messages.bookmarkForm.forceNewTab}
+                </div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  {messages.bookmarkForm.forceNewTabHint}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={values.forceNewTab}
+                onClick={() => onFieldChange('forceNewTab', !values.forceNewTab)}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full border transition ${
+                  values.forceNewTab
+                    ? 'border-primary/40 bg-primary/90'
+                    : 'border-border/80 bg-muted'
+                }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
+                    values.forceNewTab ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

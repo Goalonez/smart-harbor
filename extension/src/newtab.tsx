@@ -1,55 +1,61 @@
 import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { getMessages } from '@extension/i18n'
 import { resolveAvailableTarget } from '@extension/network'
-import { readSettings } from '@extension/storage'
-import type { ExtensionSettings, ResolvedTarget } from '@extension/types'
+import { defaultLanguage, readLanguage, readSettings } from '@extension/storage'
+import type { ExtensionLanguage, ExtensionSettings, ResolvedTarget } from '@extension/types'
 import './styles.css'
+
+const LOADING_UI_DELAY_MS = 240
 
 type NewTabState =
   | {
       phase: 'boot'
+      language: ExtensionLanguage
       settings: ExtensionSettings | null
       target: null
     }
   | {
       phase: 'ready'
+      language: ExtensionLanguage
       settings: ExtensionSettings
       target: ResolvedTarget
     }
 
-function getStatusText(reason: ResolvedTarget['reason']): string {
-  switch (reason) {
-    case 'primary':
-      return '主地址可用，正在打开导航页。'
-    case 'fallback':
-      return '主地址不可用，已自动切换到备用地址。'
-    case 'primary-unverified':
-      return '当前地址未做连通性验证，直接尝试打开。'
-    case 'fallback-unverified':
-      return '已切换到备用地址，但扩展没有权限验证连通性。'
-    case 'unconfigured':
-      return '尚未配置导航页地址。'
-  }
+function getStatusText(language: ExtensionLanguage, reason: ResolvedTarget['reason']): string {
+  return getMessages(language).newtab.statusByReason[reason]
 }
 
 export function App() {
   const [state, setState] = useState<NewTabState>({
     phase: 'boot',
+    language: defaultLanguage,
     settings: null,
     target: null,
   })
   const [noticeVisible, setNoticeVisible] = useState(true)
+  const [showLoadingUi, setShowLoadingUi] = useState(false)
+
+  useEffect(() => {
+    const timerId = window.setTimeout(() => setShowLoadingUi(true), LOADING_UI_DELAY_MS)
+    return () => window.clearTimeout(timerId)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
 
     async function bootstrap() {
-      const settings = await readSettings()
-      const target = await resolveAvailableTarget(settings.primaryUrl, settings.fallbackUrl)
+      const [settings, language] = await Promise.all([readSettings(), readLanguage()])
+      const target = await resolveAvailableTarget(
+        settings.primaryUrl,
+        settings.fallbackUrl,
+        settings.probeTimeoutMs
+      )
 
       if (!cancelled) {
         setState({
           phase: 'ready',
+          language,
           settings,
           target,
         })
@@ -87,28 +93,31 @@ export function App() {
       return
     }
 
-    const timerId = window.setTimeout(() => {
-      window.location.replace(state.target.activeUrl)
-    }, 200)
-
-    return () => window.clearTimeout(timerId)
+    window.location.replace(state.target.activeUrl)
   }, [state])
 
   if (state.phase === 'boot') {
+    const messages = getMessages(state.language)
+
+    if (!showLoadingUi) {
+      return <main className="page-shell" />
+    }
+
     return (
       <main className="page-shell">
         <section className="loading-state panel">
           <div className="loading-card panel">
             <div className="eyebrow">Smart Harbor</div>
-            <h2>正在检测可用地址</h2>
-            <p className="pulse">优先检查主地址，不通时自动切换到备用地址。</p>
+            <h2>{messages.newtab.loadingTitle}</h2>
+            <p className="pulse">{messages.newtab.loadingHint}</p>
           </div>
         </section>
       </main>
     )
   }
 
-  const { settings, target } = state
+  const { language, settings, target } = state
+  const messages = getMessages(language)
 
   if (!target.activeUrl) {
     return (
@@ -116,13 +125,11 @@ export function App() {
         <section className="empty-state panel">
           <div className="empty-card panel">
             <div className="eyebrow">Smart Harbor</div>
-            <h2>先配置导航页地址</h2>
-            <p>
-              这个新标签页插件只负责帮你打开导航页。先填写主地址和切换地址，再决定用内嵌框架还是直接跳转。
-            </p>
+            <h2>{messages.newtab.unconfiguredTitle}</h2>
+            <p>{messages.newtab.unconfiguredDescription}</p>
             <div className="status-actions" style={{ marginTop: 24 }}>
               <button className="btn btn-primary" onClick={() => chrome.runtime.openOptionsPage()}>
-                打开配置页
+                {messages.newtab.openSettingsButton}
               </button>
             </div>
           </div>
@@ -132,27 +139,18 @@ export function App() {
   }
 
   if (settings.openMode === 'direct') {
-    return (
+    return showLoadingUi ? (
       <main className="page-shell">
         <section className="loading-state panel">
           <div className="loading-card panel">
-            <div className="eyebrow">Redirecting</div>
-            <h2>正在打开导航页</h2>
-            <p>{getStatusText(target.reason)}</p>
-            <p className="hint" style={{ marginTop: 10 }}>
-              {target.activeUrl}
-            </p>
-            <div className="status-actions" style={{ marginTop: 24 }}>
-              <button className="btn btn-primary" onClick={() => window.location.replace(target.activeUrl)}>
-                立即打开
-              </button>
-              <button className="btn btn-secondary" onClick={() => chrome.runtime.openOptionsPage()}>
-                配置插件
-              </button>
-            </div>
+            <div className="eyebrow">Smart Harbor</div>
+            <h2>{messages.newtab.loadingTitle}</h2>
+            <p className="pulse">{messages.newtab.loadingHint}</p>
           </div>
         </section>
       </main>
+    ) : (
+      <main className="page-shell" />
     )
   }
 
@@ -166,8 +164,12 @@ export function App() {
       />
       {noticeVisible ? (
         <div className="floating-notice">
-          <div className="floating-notice-title">{target.reason === 'fallback' ? '已切换到备用地址' : '正在打开导航页'}</div>
-          <div className="floating-notice-text">{getStatusText(target.reason)}</div>
+          <div className="floating-notice-title">
+            {target.reason === 'fallback'
+              ? messages.newtab.noticeFallbackTitle
+              : messages.newtab.noticeOpeningTitle}
+          </div>
+          <div className="floating-notice-text">{getStatusText(language, target.reason)}</div>
         </div>
       ) : null}
     </main>

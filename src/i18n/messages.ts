@@ -179,6 +179,8 @@ const zhCN = {
     secondaryUrlHint: '可选，通常填写外网地址；留空时会继续使用主地址。',
     probes: '探测地址',
     probesHint: '用于判断当前网络环境；每行填写一个地址，不需要时可以留空。',
+    forceNewTab: '强制新标签页打开',
+    forceNewTabHint: '适用于不支持内嵌框架的页面；开启后，这个书签会始终在新标签页中打开。',
     footerHint: '保存后会直接写入配置，并立即同步到首页。',
   },
   iconPicker: {
@@ -571,6 +573,9 @@ const en: typeof zhCN = {
     probes: 'Probe URLs',
     probesHint:
       'Used to detect the current network environment. Enter one URL per line, or leave it empty.',
+    forceNewTab: 'Force open in new tab',
+    forceNewTabHint:
+      'Useful for pages that do not work well inside embedded frames. When enabled, this bookmark always opens in a new tab.',
     footerHint: 'Saving writes directly to config and syncs to the homepage immediately.',
   },
   iconPicker: {

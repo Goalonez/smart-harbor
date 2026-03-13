@@ -71,19 +71,22 @@ export function BookmarkEditDialog({
     setFeedback(null)
   }, [activeService, location, onClose, open])
 
-  function handleFieldChange(field: keyof BookmarkFormValues, value: string) {
+  function handleFieldChange<K extends keyof BookmarkFormValues>(
+    field: K,
+    value: BookmarkFormValues[K]
+  ) {
     setDraft((current) => {
-      const nextDraft = { ...current, [field]: value }
+      const nextDraft = { ...current, [field]: value } as BookmarkFormValues
 
       if (field === 'name' && !slugTouched && activeService) {
-        nextDraft.slug = buildSuggestedSlug(value, activeConfig, activeService.slug)
+        nextDraft.slug = buildSuggestedSlug(String(value), activeConfig, activeService.slug)
       }
 
       return nextDraft
     })
 
     if (field === 'slug') {
-      setSlugTouched(value.trim().length > 0)
+      setSlugTouched(String(value).trim().length > 0)
     }
 
     setFeedback(null)

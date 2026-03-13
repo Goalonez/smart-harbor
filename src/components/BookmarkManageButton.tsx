@@ -200,19 +200,22 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
     }
   }
 
-  function handleBookmarkFieldChange(field: keyof BookmarkFormValues, value: string) {
+  function handleBookmarkFieldChange<K extends keyof BookmarkFormValues>(
+    field: K,
+    value: BookmarkFormValues[K]
+  ) {
     setBookmarkDraft((current) => {
-      const nextDraft = { ...current, [field]: value }
+      const nextDraft = { ...current, [field]: value } as BookmarkFormValues
 
       if (field === 'name' && !bookmarkSlugTouched) {
-        nextDraft.slug = buildSuggestedSlug(value, activeConfig)
+        nextDraft.slug = buildSuggestedSlug(String(value), activeConfig)
       }
 
       return nextDraft
     })
 
     if (field === 'slug') {
-      setBookmarkSlugTouched(value.trim().length > 0)
+      setBookmarkSlugTouched(String(value).trim().length > 0)
     }
 
     setFeedback(null)

@@ -41,8 +41,10 @@ export function SearchBox() {
     }
 
     if (services.length === 1) {
-      const urls = resolveTargetUrl(services[0], networkMode)
-      void openWithFallback(urls, { target: activeSystemConfig.clickOpenTarget })
+      const service = services[0]
+      const urls = resolveTargetUrl(service, networkMode)
+      const openTarget = service.forceNewTab ? 'blank' : activeSystemConfig.clickOpenTarget
+      void openWithFallback(urls, { target: openTarget })
       return
     }
 

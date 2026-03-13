@@ -94,6 +94,7 @@ export function cleanServiceConfig(service: ServiceConfig): ServiceConfig {
     ...(secondaryUrl ? { secondaryUrl } : {}),
     ...(icon ? { icon } : {}),
     ...(probes && probes.length > 0 ? { probes } : {}),
+    ...(service.forceNewTab ? { forceNewTab: true } : {}),
   })
 }
 

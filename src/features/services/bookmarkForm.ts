@@ -16,6 +16,7 @@ export interface BookmarkFormValues {
   primaryUrl: string
   secondaryUrl: string
   probesText: string
+  forceNewTab: boolean
 }
 
 interface ValidateBookmarkFormOptions {
@@ -36,6 +37,7 @@ export function createEmptyBookmarkForm(config: ServicesConfig): BookmarkFormVal
     primaryUrl: 'http://127.0.0.1',
     secondaryUrl: '',
     probesText: '',
+    forceNewTab: false,
   }
 }
 
@@ -52,6 +54,7 @@ export function createBookmarkFormFromService(
     primaryUrl: service.primaryUrl,
     secondaryUrl: service.secondaryUrl ?? '',
     probesText: formatProbesInput(service.probes),
+    forceNewTab: service.forceNewTab ?? false,
   }
 }
 
@@ -94,6 +97,7 @@ export function validateBookmarkForm(
     primaryUrl: values.primaryUrl.trim(),
     secondaryUrl: values.secondaryUrl.trim(),
     probes: parseProbesInput(values.probesText),
+    forceNewTab: values.forceNewTab,
   })
 
   const duplicatedSlug = config.some((group) =>

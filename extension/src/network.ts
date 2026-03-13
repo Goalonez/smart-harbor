@@ -1,6 +1,10 @@
 import type { ResolvedTarget } from '@extension/types'
-
-const CHECK_TIMEOUT_MS = 1600
+import {
+  normalizeProbeTimeoutMs,
+  readResolutionCache,
+  RESOLUTION_CACHE_TTL_MS,
+  writeResolutionCache,
+} from '@extension/storage'
 
 function getOriginPattern(url: string): string {
   const parsed = new URL(url)
@@ -32,13 +36,13 @@ export async function requestOriginPermissions(urls: string[]): Promise<boolean>
   return chrome.permissions.request({ origins })
 }
 
-async function probe(baseUrl: string): Promise<boolean | null> {
+async function probe(baseUrl: string, timeoutMs: number): Promise<boolean | null> {
   if (!(await hasOriginPermission(baseUrl))) {
     return null
   }
 
   const controller = new AbortController()
-  const timeoutId = window.setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS)
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs)
 
   try {
     const healthUrl = new URL('/api/health', baseUrl).toString()
@@ -55,10 +59,47 @@ async function probe(baseUrl: string): Promise<boolean | null> {
   }
 }
 
+function isFreshCache(resolvedAt: number) {
+  return Date.now() - resolvedAt <= RESOLUTION_CACHE_TTL_MS
+}
+
+async function cacheResolvedTarget(
+  primaryUrl: string,
+  fallbackUrl: string,
+  target: ResolvedTarget,
+  cacheable: boolean
+) {
+  if (!cacheable || !target.activeUrl || target.reason === 'unconfigured') {
+    return
+  }
+
+  await writeResolutionCache({
+    primaryUrl,
+    fallbackUrl,
+    activeUrl: target.activeUrl,
+    reason: target.reason,
+    resolvedAt: Date.now(),
+  })
+}
+
 export async function resolveAvailableTarget(
   primaryUrl: string,
-  fallbackUrl: string
+  fallbackUrl: string,
+  probeTimeoutMs?: number
 ): Promise<ResolvedTarget> {
+  const cached = await readResolutionCache()
+  if (
+    cached &&
+    cached.primaryUrl === primaryUrl &&
+    cached.fallbackUrl === fallbackUrl &&
+    isFreshCache(cached.resolvedAt)
+  ) {
+    return {
+      activeUrl: cached.activeUrl,
+      reason: cached.reason,
+    }
+  }
+
   if (!primaryUrl && !fallbackUrl) {
     return {
       activeUrl: '',
@@ -67,30 +108,51 @@ export async function resolveAvailableTarget(
   }
 
   if (!primaryUrl) {
-    return {
+    const result: ResolvedTarget = {
       activeUrl: fallbackUrl,
       reason: 'fallback-unverified',
     }
-  }
-
-  const primaryReachable = await probe(primaryUrl)
-  if (primaryReachable !== false) {
-    return {
-      activeUrl: primaryUrl,
-      reason: primaryReachable === null ? 'primary-unverified' : 'primary',
-    }
+    await cacheResolvedTarget(primaryUrl, fallbackUrl, result, true)
+    return result
   }
 
   if (!fallbackUrl) {
-    return {
+    const result: ResolvedTarget = {
       activeUrl: primaryUrl,
       reason: 'primary-unverified',
     }
+    await cacheResolvedTarget(primaryUrl, fallbackUrl, result, true)
+    return result
   }
 
-  const fallbackReachable = await probe(fallbackUrl)
-  return {
-    activeUrl: fallbackUrl,
-    reason: fallbackReachable === null ? 'fallback-unverified' : 'fallback',
+  const timeoutMs = normalizeProbeTimeoutMs(probeTimeoutMs)
+  const [primaryReachable, fallbackReachable] = await Promise.all([
+    probe(primaryUrl, timeoutMs),
+    probe(fallbackUrl, timeoutMs),
+  ])
+
+  if (primaryReachable !== false) {
+    const result: ResolvedTarget = {
+      activeUrl: primaryUrl,
+      reason: primaryReachable === null ? 'primary-unverified' : 'primary',
+    }
+    await cacheResolvedTarget(primaryUrl, fallbackUrl, result, true)
+    return result
   }
+
+  if (fallbackReachable !== false) {
+    const result: ResolvedTarget = {
+      activeUrl: fallbackUrl,
+      reason: fallbackReachable === null ? 'fallback-unverified' : 'fallback',
+    }
+    await cacheResolvedTarget(primaryUrl, fallbackUrl, result, true)
+    return result
+  }
+
+  const result: ResolvedTarget = {
+    activeUrl: fallbackUrl,
+    reason: 'fallback',
+  }
+  await cacheResolvedTarget(primaryUrl, fallbackUrl, result, false)
+  return result
 }

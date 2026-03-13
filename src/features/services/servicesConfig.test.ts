@@ -76,6 +76,7 @@ describe('validateBookmarkForm', () => {
         primaryUrl: 'http://127.0.0.1:8080',
         secondaryUrl: 'https://example.com',
         probesText: 'https://example.com/health',
+        forceNewTab: false,
       },
       []
     )
@@ -84,6 +85,26 @@ describe('validateBookmarkForm', () => {
     expect(result.targetGroupIndex).toBe(0)
     expect(result.service.slug).toBe('new-item')
     expect(result.service.probes).toEqual(['https://example.com/health'])
+    expect(result.service.forceNewTab).toBeUndefined()
+  })
+
+  it('keeps forceNewTab when enabled', () => {
+    const result = validateBookmarkForm(
+      {
+        groupIndex: '0',
+        newGroupName: '',
+        name: 'Bitwarden',
+        slug: 'bitwarden',
+        icon: '',
+        primaryUrl: 'http://127.0.0.1:8080',
+        secondaryUrl: 'https://vault.example.com',
+        probesText: '',
+        forceNewTab: true,
+      },
+      sampleConfig
+    )
+
+    expect(result.service.forceNewTab).toBe(true)
   })
 
   it('rejects duplicate bookmark slugs', () => {
@@ -98,6 +119,7 @@ describe('validateBookmarkForm', () => {
           primaryUrl: 'http://127.0.0.1:8080',
           secondaryUrl: 'https://example.com',
           probesText: '',
+          forceNewTab: false,
         },
         sampleConfig
       )

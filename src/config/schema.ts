@@ -37,6 +37,7 @@ const canonicalServiceConfigSchema = z.object({
   primaryUrl: z.string().trim().url(),
   secondaryUrl: optionalUrl,
   probes: z.array(z.string().trim().url()).min(1).optional(),
+  forceNewTab: z.boolean().optional(),
 })
 
 const legacyServiceConfigSchema = z.object({
@@ -46,6 +47,7 @@ const legacyServiceConfigSchema = z.object({
   lanUrl: z.string().trim().url(),
   wanUrl: optionalUrl,
   probes: z.array(z.string().trim().url()).min(1).optional(),
+  forceNewTab: z.boolean().optional(),
 })
 
 export const serviceConfigSchema = z
@@ -62,6 +64,7 @@ export const serviceConfigSchema = z
       primaryUrl: service.lanUrl,
       secondaryUrl: service.wanUrl,
       probes: service.probes,
+      forceNewTab: service.forceNewTab,
     }
   })
   .pipe(canonicalServiceConfigSchema)
