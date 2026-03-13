@@ -2,16 +2,20 @@
 
 [中文](README.zh-CN.md)
 
-Your personal bookmark homepage that gets smarter with your network. Whether you're at home or on the go, Smart Harbor automatically shows the right links for your current location.
+Smart Harbor is a navigation homepage for self-hosted services. It automatically routes each bookmark to the right LAN or WAN endpoint based on your current network, so the same service stays reachable at home, on mobile data, or away from your local network.
 
-## What Makes It Smart
+## Key Features
 
-- **Location-aware bookmarks**: Automatically switches between home and external URLs based on your network
+- **Automatic LAN/WAN routing**: Switches between internal and external URLs based on your current network
 - **Visual bookmark manager**: Drag-and-drop organization with beautiful icons and categories
 - **Cloud backup**: Keep your bookmarks safe with WebDAV sync and automatic backups
 - **Secure access**: Password-protected admin panel with smart lockout protection
 - **Beautiful interface**: Dark mode support and mobile-friendly design
 - **Simple setup**: Everything stored in one config file - easy to backup and restore
+
+## Built With AI Support
+
+This project was created with support from OpenAI Codex and Claude, using a vibe coding workflow for fast iteration, implementation, and refinement.
 
 ## Quick Start
 
