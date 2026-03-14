@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useI18n } from '@/i18n/runtime'
 import { useAppStore } from '@/store/appStore'
+import { useSystemConfig } from '@/features/config/useSystemConfig'
+import { defaultSystemConfig } from '@/features/config/api'
 import { useFeedback } from '@/features/feedback/useFeedback'
 import { LazyBookmarkEditDialog } from '@/features/services/LazyBookmarkEditDialog'
 import {
@@ -14,6 +16,7 @@ import {
 } from '@/features/services/servicesConfig'
 import { useSaveServicesConfig } from '@/features/services/useSaveServicesConfig'
 import { ServiceCard } from './ServiceCard'
+import { preloadServiceIcons } from './iconRegistry'
 import { useServices } from './useServices'
 
 interface DragOverState {
@@ -49,16 +52,19 @@ function getCompactGroupWidth(cardCount: number) {
 export function ServiceGrid() {
   const { groupedServices, isLoading, config } = useServices()
   const searchKeyword = useAppStore((state) => state.searchKeyword)
+  const networkMode = useAppStore((state) => state.networkMode)
+  const { data: systemConfig } = useSystemConfig()
   const saveMutation = useSaveServicesConfig()
   const { showToast, confirm } = useFeedback()
   const { messages } = useI18n()
-  const [isVisible, setIsVisible] = useState(false)
   const [draggingSlug, setDraggingSlug] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState<DragOverState | null>(null)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [editingSlug, setEditingSlug] = useState<string | null>(null)
   const [gridWidth, setGridWidth] = useState(0)
+  const [, setIconRenderVersion] = useState(0)
   const gridRef = useRef<HTMLDivElement | null>(null)
+  const activeSystemConfig = systemConfig ?? defaultSystemConfig
 
   const activeConfig = useMemo(() => cloneServicesConfig(config ?? defaultServicesConfig), [config])
   const canDrag = searchKeyword.trim().length === 0 && !saveMutation.isPending
@@ -73,18 +79,31 @@ export function ServiceGrid() {
         .filter((group) => group.actualGroupIndex >= 0),
     [activeConfig, groupedServices]
   )
+  const visibleServiceIcons = useMemo(
+    () =>
+      Array.from(
+        new Set(displayGroups.flatMap((group) => group.services.map((service) => service.icon)))
+      ),
+    [displayGroups]
+  )
 
   useEffect(() => {
-    if (isLoading || groupedServices.length === 0) {
-      setIsVisible(false)
-      return
+    let cancelled = false
+
+    void preloadServiceIcons(visibleServiceIcons).then((loadedAny) => {
+      if (cancelled || !loadedAny) {
+        return
+      }
+
+      startTransition(() => {
+        setIconRenderVersion((version) => version + 1)
+      })
+    })
+
+    return () => {
+      cancelled = true
     }
-
-    setIsVisible(false)
-    const timeoutId = setTimeout(() => setIsVisible(true), 40)
-
-    return () => clearTimeout(timeoutId)
-  }, [groupedServices.length, isLoading])
+  }, [visibleServiceIcons])
 
   useEffect(() => {
     if (!contextMenu) {
@@ -291,13 +310,14 @@ export function ServiceGrid() {
                       return (
                         <div
                           key={service.slug}
-                          className={`transform-gpu transition-all duration-500 ease-out ${canKeepSingleRow ? 'lg:w-[8.125rem]' : ''} ${
-                            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
-                          }`}
-                          style={{ transitionDelay: `${(groupIndex * 3 + index) * 45}ms` }}
+                          className={`transform-gpu animate-slide-up motion-reduce:animate-none ${canKeepSingleRow ? 'lg:w-[8.125rem]' : ''}`}
+                          style={{ animationDelay: `${(groupIndex * 3 + index) * 45}ms` }}
                         >
                           <ServiceCard
                             service={service}
+                            networkMode={networkMode}
+                            clickOpenTarget={activeSystemConfig.clickOpenTarget}
+                            middleClickOpenTarget={activeSystemConfig.middleClickOpenTarget}
                             draggable={canDrag}
                             isDragging={draggingSlug === service.slug}
                             isDropTarget={isCardDropTarget}

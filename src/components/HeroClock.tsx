@@ -5,22 +5,30 @@ function pad(value: number) {
   return value.toString().padStart(2, '0')
 }
 
-function formatClock(now: Date, language: string) {
+function createClockFormatters(language: string) {
+  return {
+    dateFormatter: new Intl.DateTimeFormat(language, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }),
+    weekdayFormatter: new Intl.DateTimeFormat(language, {
+      weekday: 'long',
+    }),
+  }
+}
+
+function formatClock(
+  now: Date,
+  formatters: ReturnType<typeof createClockFormatters>
+) {
   const hours = pad(now.getHours())
   const minutes = pad(now.getMinutes())
   const seconds = pad(now.getSeconds())
-  const dateText = new Intl.DateTimeFormat(language, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(now)
-  const weekdayText = new Intl.DateTimeFormat(language, {
-    weekday: 'long',
-  }).format(now)
 
   return {
-    dateText,
-    weekdayText,
+    dateText: formatters.dateFormatter.format(now),
+    weekdayText: formatters.weekdayFormatter.format(now),
     timeText: `${hours}:${minutes}:${seconds}`,
   }
 }
@@ -30,24 +38,31 @@ export function HeroClock() {
   const { language } = useI18n()
 
   useEffect(() => {
-    let timerId = 0
-
-    const syncClock = () => {
+    const intervalId = window.setInterval(() => {
       const current = new Date()
-      setNow(current)
-      timerId = window.setTimeout(syncClock, 1000 - current.getMilliseconds())
-    }
+      setNow((previous) => {
+        if (
+          previous.getSeconds() === current.getSeconds() &&
+          previous.getMinutes() === current.getMinutes() &&
+          previous.getHours() === current.getHours() &&
+          previous.getDate() === current.getDate()
+        ) {
+          return previous
+        }
 
-    syncClock()
+        return current
+      })
+    }, 250)
 
     return () => {
-      window.clearTimeout(timerId)
+      window.clearInterval(intervalId)
     }
   }, [])
 
+  const formatters = useMemo(() => createClockFormatters(language), [language])
   const { dateText, weekdayText, timeText } = useMemo(
-    () => formatClock(now, language),
-    [language, now]
+    () => formatClock(now, formatters),
+    [formatters, now]
   )
   return (
     <div className="flex flex-col items-center">

@@ -219,6 +219,11 @@ npm run package:extension
 - 目录：`extension/smart-harbor-new-tab-v<version>`
 - 压缩包：`extension/smart-harbor-new-tab-v<version>.zip`
 
+## 已知问题
+
+- 在 iOS 设备上，如果 Smart Harbor 是通过 HTTPS 打开的，浏览器通常无法从该页面直接探测 HTTP 局域网地址。这会导致自动网络探测无法准确判断当前应使用内网还是外网地址。
+- 为了兼容这种限制，首页左上角的网络状态弹窗提供了 `自动检测`、`局域网`、`外网` 三个直选项。遇到 iOS 无法探测的情况时，可以手动切换到当前需要的网络模式。
+
 ## 本地开发
 
 ```bash

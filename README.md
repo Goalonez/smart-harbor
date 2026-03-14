@@ -219,6 +219,11 @@ Generated output:
 - Folder: `extension/smart-harbor-new-tab-v<version>`
 - Zip: `extension/smart-harbor-new-tab-v<version>.zip`
 
+## Known Issues
+
+- On iOS devices, when Smart Harbor is opened over HTTPS, the browser usually cannot probe HTTP LAN addresses from that page. In that case, automatic network detection may not be able to decide correctly between LAN and WAN URLs.
+- To work around this limitation, the network status dialog in the top-left corner of the homepage provides three direct options: `Auto detect`, `LAN`, and `WAN`. If detection fails on iOS, switch to the mode you need manually.
+
 ## Development
 
 ```bash

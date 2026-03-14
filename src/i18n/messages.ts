@@ -61,8 +61,16 @@ const zhCN = {
     networkInfo: {
       buttonAria: '查看网络模式说明',
       title: '网络模式说明',
-      summary: '系统只会在首页加载时检测一次当前网络环境，不会在每次打开书签时单独探测。',
+      summary: '系统默认只会在首页加载时检测一次当前网络环境，不会在每次打开书签时单独探测。',
       currentMode: '当前模式',
+      currentStrategy: '当前策略',
+      strategyLabel: '网络切换',
+      strategyAuto: '自动检测',
+      strategyManual: '手动切换',
+      autoHint: '直接选择要使用的网络模式。选“自动检测”时，首页加载会尝试判断当前是在局域网还是外网。',
+      manualHint: '适用于 iOS 等无法从 HTTPS 页面探测 HTTP 地址的场景，切换后会立即影响所有书签的打开地址。',
+      manualModeLabel: '手动网络',
+      manualModeHint: '请选择当前应该优先使用的地址类型。',
       lanRule: '检测为局域网时，所有书签统一使用主地址。',
       wanRule: '检测为外网时，优先使用切换地址；如果切换地址为空，则继续使用主地址。',
       unknownRule: '未检测完成前，会先按主地址处理。',
@@ -444,8 +452,18 @@ const en: typeof zhCN = {
       buttonAria: 'View network mode details',
       title: 'Network mode details',
       summary:
-        'The app checks the current network environment once when the homepage loads and does not probe each bookmark when opening it.',
+        'By default, the app checks the current network environment once when the homepage loads and does not probe each bookmark when opening it.',
       currentMode: 'Current mode',
+      currentStrategy: 'Current strategy',
+      strategyLabel: 'Network switching',
+      strategyAuto: 'Auto detect',
+      strategyManual: 'Manual switch',
+      autoHint:
+        'Choose the network mode directly here. When Auto detect is selected, the homepage will try to determine whether you are on LAN or WAN as it loads.',
+      manualHint:
+        'Useful on iOS and similar environments where an HTTPS page cannot probe HTTP addresses. Switching takes effect for all bookmarks immediately.',
+      manualModeLabel: 'Manual network',
+      manualModeHint: 'Choose which address type should be preferred right now.',
       lanRule: 'When LAN is detected, all bookmarks use the primary URL.',
       wanRule:
         'When WAN is detected, the switched URL is preferred; if it is empty, the primary URL is used.',
