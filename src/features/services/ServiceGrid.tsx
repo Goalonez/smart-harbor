@@ -28,9 +28,9 @@ interface ContextMenuState {
 }
 
 const DESKTOP_SECTION_PADDING_PX = 24
-const DESKTOP_LABEL_WIDTH_PX = 80
-const DESKTOP_CONTENT_GAP_PX = 16
-const DESKTOP_CARD_WIDTH_PX = 152
+const DESKTOP_LABEL_WIDTH_PX = 84
+const DESKTOP_CONTENT_GAP_PX = 12
+const DESKTOP_CARD_WIDTH_PX = 130
 const DESKTOP_CARD_GAP_PX = 10
 
 function getCompactGroupWidth(cardCount: number) {
@@ -209,8 +209,12 @@ export function ServiceGrid() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <p className="text-muted-foreground">{messages.common.loading}</p>
+      <div className="flex min-h-[420px] items-center justify-center">
+        <div className="rounded-[1.75rem] border border-border/75 bg-card/72 px-8 py-6 text-center shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:bg-card/70 dark:shadow-[0_24px_56px_rgba(0,0,0,0.28)]">
+          <p className="text-sm font-medium tracking-wide text-muted-foreground">
+            {messages.common.loading}
+          </p>
+        </div>
       </div>
     )
   }
@@ -219,8 +223,8 @@ export function ServiceGrid() {
     const hasAnyBookmarks = activeConfig.some((group) => group.items.length > 0)
 
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="max-w-lg rounded-2xl border border-dashed border-border/80 bg-muted/15 px-6 py-8 text-center">
+      <div className="flex min-h-[420px] items-center justify-center">
+        <div className="max-w-lg rounded-[1.75rem] border border-dashed border-border/80 bg-card/60 px-6 py-9 text-center shadow-[0_18px_44px_rgba(15,23,42,0.05)] backdrop-blur-xl">
           <p className="text-base font-semibold text-foreground">
             {hasAnyBookmarks ? messages.home.noSearchResults : messages.home.emptyTitle}
           </p>
@@ -237,7 +241,7 @@ export function ServiceGrid() {
 
   return (
     <>
-      <div ref={gridRef} className="flex w-full flex-wrap items-start gap-3 md:gap-4">
+      <div ref={gridRef} className="flex w-full flex-wrap items-start gap-3 md:gap-3.5">
         {displayGroups.map((group, groupIndex) => {
           const isGroupDropTarget =
             dragOver?.groupIndex === group.actualGroupIndex &&
@@ -248,20 +252,20 @@ export function ServiceGrid() {
           return (
             <section
               key={group.category}
-              className={`w-full rounded-xl border border-border/80 bg-muted/18 p-2.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-sm transition md:p-3 dark:bg-muted/12 ${canKeepSingleRow ? 'lg:max-w-full lg:flex-none lg:w-fit' : 'lg:w-full'} ${isGroupDropTarget ? 'border-primary/40 ring-2 ring-primary/10' : ''}`}
+              className={`w-full rounded-[1.55rem] border border-border/75 bg-card/62 p-2.5 shadow-[0_16px_34px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl transition duration-300 md:p-3 dark:bg-card/60 dark:shadow-[0_18px_44px_rgba(0,0,0,0.28)] ${canKeepSingleRow ? 'lg:w-fit lg:flex-none' : 'lg:flex-1 lg:basis-full'} ${isGroupDropTarget ? 'border-primary/40 ring-2 ring-primary/10' : ''}`}
             >
-              <div className="flex flex-col gap-2.5 md:flex-row md:items-start md:gap-4">
-                <div className="flex w-full shrink-0 items-center justify-between rounded-lg border border-border/70 bg-background/45 px-3 py-2 text-left shadow-sm md:w-20 md:flex-col md:items-start md:justify-start md:px-3">
-                  <h3 className="text-[13px] font-semibold tracking-tight leading-5 text-foreground break-words">
+              <div className="flex flex-col gap-2.5 md:flex-row md:items-start md:gap-3">
+                <div className="flex w-full shrink-0 items-center justify-center rounded-[1.15rem] border border-border/70 bg-[linear-gradient(180deg,hsl(var(--background)/0.96),hsl(var(--background)/0.84))] px-4 py-3 text-center shadow-[0_10px_24px_rgba(15,23,42,0.05)] md:w-[5.25rem] md:flex-col md:justify-center md:self-stretch">
+                  <h3 className="break-words text-[14px] font-semibold leading-5 tracking-tight text-foreground md:text-[15px]">
                     {group.category}
                   </h3>
-                  <span className="text-[11px] text-muted-foreground md:mt-1">
+                  <span className="mt-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                     {messages.common.itemCount(group.services.length)}
                   </span>
                 </div>
 
                 <div
-                  className={`grid min-h-[76px] w-full flex-1 grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] gap-2 rounded-lg transition sm:grid-cols-[repeat(auto-fill,minmax(8.25rem,1fr))] md:gap-2.5 ${canKeepSingleRow ? 'lg:flex lg:w-fit lg:flex-none lg:flex-nowrap lg:justify-start' : 'lg:flex lg:flex-1 lg:flex-wrap lg:content-start lg:justify-start'} ${isGroupDropTarget ? 'bg-primary/5 p-1.5' : ''}`}
+                  className={`grid min-h-[76px] w-full flex-1 grid-cols-2 gap-2 rounded-[1.15rem] bg-background/34 p-1 transition sm:grid-cols-3 md:grid-cols-4 md:gap-2.5 md:p-1.5 ${canKeepSingleRow ? 'lg:flex lg:w-fit lg:flex-none lg:flex-nowrap lg:justify-start' : 'lg:grid lg:grid-cols-6 xl:grid-cols-8'} ${isGroupDropTarget ? 'bg-primary/6 ring-1 ring-primary/10' : ''}`}
                   onDragOver={(event) => {
                     if (!canDrag || !draggingSlug) {
                       return
@@ -287,7 +291,7 @@ export function ServiceGrid() {
                       return (
                         <div
                           key={service.slug}
-                          className={`transform-gpu transition-all duration-500 ease-out lg:w-[9.5rem] ${
+                          className={`transform-gpu transition-all duration-500 ease-out ${canKeepSingleRow ? 'lg:w-[8.125rem]' : ''} ${
                             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
                           }`}
                           style={{ transitionDelay: `${(groupIndex * 3 + index) * 45}ms` }}
@@ -341,7 +345,7 @@ export function ServiceGrid() {
                       )
                     })
                   ) : (
-                    <div className="col-span-full flex min-h-[84px] min-w-[250px] items-center justify-center rounded-lg border border-dashed border-border/70 bg-background/40 px-4 text-sm text-muted-foreground">
+                    <div className="col-span-full flex min-h-[90px] items-center justify-center rounded-[1rem] border border-dashed border-border/70 bg-background/56 px-4 text-sm text-muted-foreground">
                       {messages.serviceGrid.dropHint}
                     </div>
                   )}
@@ -363,7 +367,7 @@ export function ServiceGrid() {
         createPortal(
           <div className="fixed inset-0 z-[95]" onClick={() => setContextMenu(null)}>
             <div
-              className="absolute w-44 overflow-hidden rounded-xl border border-border/80 bg-popover p-1 shadow-2xl"
+              className="absolute w-48 overflow-hidden rounded-[1rem] border border-border/80 bg-popover/96 p-1.5 shadow-[0_24px_56px_rgba(15,23,42,0.2)] backdrop-blur-xl dark:shadow-[0_24px_60px_rgba(0,0,0,0.42)]"
               style={{ left: menuLeft, top: menuTop }}
               onClick={(event) => event.stopPropagation()}
             >
@@ -373,7 +377,7 @@ export function ServiceGrid() {
                   setEditingSlug(contextMenu.slug)
                   setContextMenu(null)
                 }}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition hover:bg-accent/80"
               >
                 <Pencil className="h-4 w-4" />
                 {messages.serviceGrid.editAction}
@@ -381,7 +385,7 @@ export function ServiceGrid() {
               <button
                 type="button"
                 onClick={() => handleDeleteBookmark(contextMenu.slug)}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 transition hover:bg-red-500/10"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-500/10"
               >
                 <Trash2 className="h-4 w-4" />
                 {messages.serviceGrid.deleteAction}

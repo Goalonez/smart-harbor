@@ -71,7 +71,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 
       {createPortal(
         <>
-          <div className="pointer-events-none fixed right-4 top-4 z-[120] flex w-[min(380px,calc(100vw-2rem))] flex-col gap-3">
+          <div className="pointer-events-none fixed right-3 top-3 z-[120] flex w-[min(400px,calc(100vw-1.5rem))] flex-col gap-3 sm:right-4 sm:top-4 sm:w-[min(400px,calc(100vw-2rem))]">
             {toasts.map((toast) => {
               const meta = toastMeta[toast.type]
               const Icon = meta.icon
@@ -80,12 +80,12 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
                 <div
                   key={toast.id}
                   className={cn(
-                    'pointer-events-auto relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl',
+                    'pointer-events-auto relative overflow-hidden rounded-[1.35rem] border shadow-[0_24px_56px_rgba(15,23,42,0.18)] backdrop-blur-xl',
                     meta.containerClass
                   )}
                 >
                   <div className={cn('absolute inset-y-0 left-0 w-1.5', meta.accentClass)} />
-                  <div className="flex items-start gap-3 px-4 py-3 pl-5">
+                  <div className="flex items-start gap-3 px-4 py-3.5 pl-5">
                     <div
                       className={cn(
                         'mt-0.5 shrink-0 rounded-full p-1.5 shadow-sm',
@@ -103,7 +103,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
                       >
                         {meta.title}
                       </div>
-                      <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
+                      <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-100/95">
                         {toast.message}
                       </p>
                     </div>
@@ -125,7 +125,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 
           {confirmation && (
             <div
-              className="fixed inset-0 z-[130] bg-black/60 p-4 backdrop-blur-sm"
+              className="fixed inset-0 z-[130] bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.14),transparent_18%),rgba(2,6,23,0.62)] p-4 backdrop-blur-sm"
               onMouseDown={(event) => {
                 if (event.target === event.currentTarget) {
                   closeConfirmation(false)
@@ -133,11 +133,11 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
               }}
             >
               <div
-                className="mx-auto mt-24 w-full max-w-md rounded-2xl border border-border/80 bg-background shadow-2xl"
+                className="mx-auto mt-24 w-full max-w-md rounded-[1.6rem] border border-border/80 bg-background/96 shadow-[0_30px_80px_rgba(15,23,42,0.2)] backdrop-blur-xl dark:bg-background/92"
                 onMouseDown={(event) => event.stopPropagation()}
               >
                 <div className="flex items-start gap-3 border-b border-border/70 px-5 py-4">
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-2 text-red-600 dark:text-red-300">
+                  <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-2 text-rose-600 dark:text-rose-300">
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">

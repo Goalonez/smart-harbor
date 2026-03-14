@@ -58,21 +58,22 @@ export function ServiceCard({
   return (
     <Card
       className={cn(
-        'group h-full cursor-pointer rounded-lg border border-border/85 bg-card/92 px-2 py-1.5 shadow-[0_10px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/25 hover:bg-card hover:shadow-[0_12px_28px_rgba(15,23,42,0.12)] dark:bg-card/82 dark:shadow-[0_12px_28px_rgba(0,0,0,0.26)] dark:hover:shadow-[0_14px_30px_rgba(0,0,0,0.32)]',
+        'group relative h-full cursor-pointer overflow-hidden rounded-[1.08rem] border border-border/80 bg-card/90 px-2.25 py-1.5 shadow-[0_12px_24px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:bg-card hover:shadow-[0_16px_32px_rgba(15,23,42,0.12)] dark:bg-card/80 dark:shadow-[0_16px_34px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.34)]',
         isDragging && 'cursor-grabbing opacity-45 shadow-none',
-        isDropTarget && 'border-primary/50 ring-2 ring-primary/20',
+        isDropTarget && 'border-primary/50 ring-2 ring-primary/15',
         className
       )}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       {...props}
     >
-      <div className="grid min-h-[58px] grid-cols-[auto_minmax(0,1fr)] items-center gap-1.5">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border/75 bg-background/85 text-primary/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-transform duration-300 group-hover:scale-[1.04]">
-          <ServiceIcon name={service.icon} className="h-3.5 w-3.5" />
+      <div className="pointer-events-none absolute inset-x-3 top-0 h-10 rounded-b-[999px] bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.16),transparent_72%)] opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative grid min-h-[54px] grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+        <div className="flex h-[1.85rem] w-[1.85rem] shrink-0 items-center justify-center rounded-[0.85rem] border border-border/70 bg-background/92 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_18px_hsl(var(--primary)/0.1)] transition-transform duration-300 group-hover:scale-[1.04] group-hover:border-primary/25 group-hover:bg-background">
+          <ServiceIcon name={service.icon} className="h-3.25 w-3.25" />
         </div>
-        <div className="flex min-h-[1.875rem] min-w-0 items-center justify-start pr-1">
-          <div className="w-full min-w-0 text-left text-[12.5px] font-medium leading-[1.25] text-foreground sm:text-[13px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-normal">
+        <div className="flex min-h-[2rem] min-w-0 items-center justify-start pr-0.5">
+          <div className="w-full min-w-0 text-left text-[12px] font-semibold leading-[1.28] text-foreground/95 sm:text-[12.5px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-normal">
             {service.name}
           </div>
         </div>

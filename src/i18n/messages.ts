@@ -106,7 +106,7 @@ const zhCN = {
     panelTitle: '功能面板',
     importSection: {
       label: '导入书签',
-      description: '导入 Chrome / Edge / Safari 书签',
+      description: '导入浏览器书签',
       title: '导入浏览器书签',
       summary:
         '支持导入 Chrome、Edge、Safari 导出的 HTML 书签文件；会尽量按原文件夹结构生成分组，没有分组的书签则放入“导入书签”。',
@@ -258,7 +258,7 @@ const zhCN = {
       nextPasswordLabel: '新密码',
       confirmPasswordLabel: '确认新密码',
       passwordPolicyHint: '新密码至少 12 位。',
-      updateCredentialsButton: '更新账号密码',
+      updateCredentialsButton: '保存',
       updateCredentialsPending: '保存中...',
       logoutButton: '退出登录',
       logoutPending: '退出中...',
@@ -293,14 +293,13 @@ const zhCN = {
     },
     webdavSection: {
       label: 'WebDAV 备份',
-      description: '远程备份、版本恢复与定时策略',
+      description: '远程备份与恢复',
       title: 'WebDAV 备份',
       summary: '将完整 config.json 备份到 WebDAV，支持手动备份、自动备份、版本恢复与数量保留。',
       connectionTitle: '连接配置',
-      connectionHint:
-        '保存后可用于手动备份和自动备份。远程路径支持多级目录，服务端会自动创建缺失文件夹。',
+      connectionHint: '保存后即可用于手动备份和自动备份，远程路径会自动创建多级目录。',
       urlLabel: 'WebDAV 地址',
-      urlHint: '例如：https://dav.example.com/remote.php/dav/files/admin',
+      urlHint: '',
       usernameLabel: '用户名',
       passwordLabel: '密码',
       remotePathLabel: '远程路径',
@@ -492,7 +491,7 @@ const en: typeof zhCN = {
     panelTitle: 'Actions',
     importSection: {
       label: 'Import Bookmarks',
-      description: 'Import Chrome / Edge / Safari bookmarks',
+      description: 'Import browser bookmarks',
       title: 'Import Browser Bookmarks',
       summary:
         'Import bookmark HTML files exported from Chrome, Edge, or Safari. Folder structure is preserved as much as possible, and ungrouped bookmarks go into “导入书签”.',
@@ -657,7 +656,7 @@ const en: typeof zhCN = {
       nextPasswordLabel: 'New Password',
       confirmPasswordLabel: 'Confirm New Password',
       passwordPolicyHint: 'The new password must be at least 12 characters.',
-      updateCredentialsButton: 'Update Credentials',
+      updateCredentialsButton: 'Save',
       updateCredentialsPending: 'Saving...',
       logoutButton: 'Log Out',
       logoutPending: 'Logging out...',
@@ -694,15 +693,15 @@ const en: typeof zhCN = {
     },
     webdavSection: {
       label: 'WebDAV Backup',
-      description: 'Remote backup, restore, and scheduling',
+      description: 'Backup and restore',
       title: 'WebDAV Backup',
       summary:
         'Back up the full config.json to WebDAV with manual backup, automatic backup, version restore, and retention.',
       connectionTitle: 'Connection',
       connectionHint:
-        'Save these settings before using manual or automatic backups. Nested remote paths are supported and missing folders are created automatically.',
+        'Save first to enable manual and automatic backups. Nested remote paths are created automatically.',
       urlLabel: 'WebDAV URL',
-      urlHint: 'Example: https://dav.example.com/remote.php/dav/files/admin',
+      urlHint: '',
       usernameLabel: 'Username',
       passwordLabel: 'Password',
       remotePathLabel: 'Remote Path',

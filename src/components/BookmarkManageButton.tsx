@@ -40,6 +40,9 @@ interface BookmarkManageButtonProps {
   initialOpen?: boolean
 }
 
+const sectionCardClass = 'config-panel-card p-4'
+const compactSectionCardClass = 'config-panel-card p-3'
+
 export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButtonProps) {
   const { data: servicesConfig } = useServicesConfig()
   const saveMutation = useSaveServicesConfig()
@@ -314,9 +317,9 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
         size="icon"
         aria-label={messages.bookmarkManage.buttonAria}
         onClick={openDialog}
-        className="rounded-full"
+        className="h-10 w-10 rounded-full"
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-4.5 w-4.5" />
       </Button>
 
       <ModalShell
@@ -346,13 +349,14 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                     variant="outline"
                     size="sm"
                     onClick={() => setIsOpen(false)}
+                    className="w-full sm:w-auto"
                   >
                     {messages.common.close}
                   </Button>
                 </>
               }
             >
-              <div className="rounded-xl border border-dashed border-border/80 bg-muted/12 p-3">
+              <div className="config-panel-card rounded-[1.2rem] border-dashed border-primary/20 bg-primary/[0.04] p-3">
                 <div className="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_auto]">
                   <Input
                     value={newGroupName}
@@ -361,7 +365,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                       setFeedback(null)
                     }}
                     placeholder={messages.bookmarkManage.groupSection.createPlaceholder}
-                    className="h-9"
+                    className="h-10"
                   />
                   <Button
                     type="button"
@@ -408,7 +412,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                         }}
                         onDragEnd={clearGroupDragState}
                         className={cn(
-                          'rounded-xl border border-border/80 bg-background/80 p-3 shadow-sm transition',
+                          `${compactSectionCardClass} transition`,
                           !saveMutation.isPending && 'cursor-grab',
                           isDragging && 'cursor-grabbing opacity-55',
                           isDropTarget && 'border-primary/40 ring-2 ring-primary/10'
@@ -431,7 +435,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                                 placeholder={
                                   messages.bookmarkManage.groupSection.groupNamePlaceholder
                                 }
-                                className="h-9 md:flex-1"
+                                className="h-10 md:flex-1"
                               />
                               <div className="flex items-center gap-2">
                                 <Button
@@ -464,7 +468,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                     )
                   })
                 ) : (
-                  <div className="rounded-xl border border-dashed border-border/80 px-4 py-10 text-center text-sm text-muted-foreground">
+                  <div className="rounded-[1.2rem] border border-dashed border-border/80 bg-background/46 px-4 py-10 text-center text-sm text-muted-foreground">
                     {messages.bookmarkManage.groupSection.emptyState}
                   </div>
                 )}
@@ -474,7 +478,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
             <ConfigPanelSection
               title={messages.bookmarkManage.bookmarkSection.title}
               summary={messages.bookmarkManage.bookmarkSection.summary}
-              bodyClassName="overflow-hidden p-0"
+              bodyClassName="flex min-h-0 flex-1 flex-col overflow-hidden p-0"
             >
               <BookmarkForm
                 config={activeConfig}
@@ -501,6 +505,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                     variant="outline"
                     size="sm"
                     onClick={() => setIsOpen(false)}
+                    className="w-full sm:w-auto"
                   >
                     {messages.common.close}
                   </Button>
@@ -516,7 +521,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
               />
 
               <div className="grid gap-3">
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Upload className="h-4.5 w-4.5 text-primary" />
                     {messages.bookmarkManage.importSection.fileTitle}
@@ -540,7 +545,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="text-sm font-semibold text-foreground">
                     {messages.bookmarkManage.importSection.targetGroupTitle}
                   </div>
