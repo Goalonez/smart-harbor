@@ -54,7 +54,7 @@ export function LazyBookmarkManageButton() {
       variant="outline"
       size="icon"
       aria-label={messages.bookmarkManage.buttonAria}
-      className="rounded-full"
+      className="h-10 w-10 rounded-full"
       onClick={() => setOpenOnLoad(true)}
       onMouseEnter={() => {
         void loadBookmarkManageButton()

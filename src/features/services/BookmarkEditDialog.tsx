@@ -143,7 +143,7 @@ export function BookmarkEditDialog({
       icon={Pencil}
       widthClassName="max-w-3xl"
     >
-      <div className="min-h-[520px] flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden md:min-h-[520px]">
         <BookmarkForm
           config={activeConfig}
           values={draft}

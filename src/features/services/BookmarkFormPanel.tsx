@@ -36,41 +36,41 @@ export function BookmarkForm({
   onFieldChange,
 }: BookmarkFormProps) {
   const { messages } = useI18n()
+  const fieldCardClass = 'config-panel-card-muted space-y-1.5 p-3'
+  const compactFieldCardClass = 'config-panel-card-muted space-y-1 p-2.5'
+  const fieldLabelClass =
+    'text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/90'
 
   return (
     <form
-      className="flex h-full flex-col"
+      className="flex min-h-0 flex-1 flex-col"
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
       }}
     >
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="config-scroll min-h-0 flex-1 overflow-y-auto px-3.5 py-3 pb-5 sm:px-5 sm:py-4 sm:pb-6">
         <div className="grid gap-3 md:grid-cols-2">
           {config.length === 0 ? (
-            <label className="md:col-span-2">
-              <span className="mb-1 block text-[13px] font-medium text-foreground">
-                {messages.bookmarkForm.firstGroup}
-              </span>
+            <label className={`${fieldCardClass} md:col-span-2`}>
+              <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.firstGroup}</span>
               <Input
                 value={values.newGroupName}
                 onChange={(event) => onFieldChange('newGroupName', event.target.value)}
                 placeholder={messages.common.firstGroupExample}
-                className="h-9"
+                className="h-10"
               />
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 {messages.bookmarkForm.firstGroupHint}
               </p>
             </label>
           ) : (
-            <label>
-              <span className="mb-1 block text-[13px] font-medium text-foreground">
-                {messages.bookmarkForm.group}
-              </span>
+            <label className={fieldCardClass}>
+              <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.group}</span>
               <select
                 value={values.groupIndex}
                 onChange={(event) => onFieldChange('groupIndex', event.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-ring/20"
+                className="config-panel-select"
               >
                 {config.map((group, index) => (
                   <option key={group.category} value={index}>
@@ -84,40 +84,34 @@ export function BookmarkForm({
             </label>
           )}
 
-          <label>
-            <span className="mb-1 block text-[13px] font-medium text-foreground">
-              {messages.bookmarkForm.name}
-            </span>
+          <label className={fieldCardClass}>
+            <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.name}</span>
             <Input
               value={values.name}
               onChange={(event) => onFieldChange('name', event.target.value)}
               placeholder={messages.common.bookmarkNameExample}
-              className="h-9"
+              className="h-10"
             />
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               {messages.bookmarkForm.nameHint}
             </p>
           </label>
 
-          <label>
-            <span className="mb-1 block text-[13px] font-medium text-foreground">
-              {messages.bookmarkForm.slug}
-            </span>
+          <label className={fieldCardClass}>
+            <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.slug}</span>
             <Input
               value={values.slug}
               onChange={(event) => onFieldChange('slug', event.target.value)}
               placeholder={messages.common.bookmarkSlugExample}
-              className="h-9"
+              className="h-10"
             />
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               {messages.bookmarkForm.slugHint}
             </p>
           </label>
 
-          <label>
-            <span className="mb-1 block text-[13px] font-medium text-foreground">
-              {messages.bookmarkForm.icon}
-            </span>
+          <label className={fieldCardClass}>
+            <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.icon}</span>
             <IconPicker
               size="sm"
               value={values.icon || undefined}
@@ -128,96 +122,91 @@ export function BookmarkForm({
             </p>
           </label>
 
-          <label>
-            <span className="mb-1 block text-[13px] font-medium text-foreground">
-              {messages.bookmarkForm.primaryUrl}
-            </span>
+          <label className={fieldCardClass}>
+            <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.primaryUrl}</span>
             <Input
               value={values.primaryUrl}
               onChange={(event) => onFieldChange('primaryUrl', event.target.value)}
               placeholder="http://192.168.1.100:8080"
-              className="h-9"
+              className="h-10"
             />
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               {messages.bookmarkForm.primaryUrlHint}
             </p>
           </label>
 
-          <label>
-            <span className="mb-1 block text-[13px] font-medium text-foreground">
-              {messages.bookmarkForm.secondaryUrl}
-            </span>
+          <label className={fieldCardClass}>
+            <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.secondaryUrl}</span>
             <Input
               value={values.secondaryUrl}
               onChange={(event) => onFieldChange('secondaryUrl', event.target.value)}
               placeholder="https://example.com"
-              className="h-9"
+              className="h-10"
             />
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               {messages.bookmarkForm.secondaryUrlHint}
             </p>
           </label>
 
-          <label className="md:col-span-2">
-            <span className="mb-1 block text-[13px] font-medium text-foreground">
-              {messages.bookmarkForm.probes}
-            </span>
-            <textarea
-              value={values.probesText}
-              onChange={(event) => onFieldChange('probesText', event.target.value)}
-              spellCheck={false}
-              rows={3}
-              className="w-full resize-y rounded-md border border-border/80 bg-background px-3 py-2 text-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-ring/20"
-              placeholder={messages.common.probePlaceholder}
-            />
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              {messages.bookmarkForm.probesHint}
-            </p>
-          </label>
+          <div className="grid gap-3 md:col-span-2 md:grid-cols-[minmax(0,1.45fr)_minmax(15rem,1fr)]">
+            <label className={compactFieldCardClass}>
+              <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.probes}</span>
+              <textarea
+                value={values.probesText}
+                onChange={(event) => onFieldChange('probesText', event.target.value)}
+                spellCheck={false}
+                rows={2}
+                className="bookmark-form-probes config-panel-textarea min-h-[5.25rem] resize-y"
+                placeholder={messages.common.probePlaceholder}
+              />
+              <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
+                {messages.bookmarkForm.probesHint}
+              </p>
+            </label>
 
-          <div className="md:col-span-2">
-            <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/15 p-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="text-[13px] font-medium text-foreground">
-                  {messages.bookmarkForm.forceNewTab}
+            <div className="min-w-0">
+              <div className="config-panel-card flex h-full flex-col justify-between gap-2.5 p-2.5">
+                <div>
+                  <div className="text-[12px] font-medium text-foreground sm:text-[13px]">
+                    {messages.bookmarkForm.forceNewTab}
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
+                    {messages.bookmarkForm.forceNewTabHint}
+                  </p>
                 </div>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  {messages.bookmarkForm.forceNewTabHint}
-                </p>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={values.forceNewTab}
+                  onClick={() => onFieldChange('forceNewTab', !values.forceNewTab)}
+                  data-checked={values.forceNewTab}
+                  className="config-switch self-start"
+                >
+                  <span className="config-switch-thumb" />
+                </button>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={values.forceNewTab}
-                onClick={() => onFieldChange('forceNewTab', !values.forceNewTab)}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full border transition ${
-                  values.forceNewTab
-                    ? 'border-primary/40 bg-primary/90'
-                    : 'border-border/80 bg-muted'
-                }`}
-              >
-                <span
-                  className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
-                    values.forceNewTab ? 'translate-x-7' : 'translate-x-1'
-                  }`}
-                />
-              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-border/70 px-4 py-3 md:flex-row md:items-center md:justify-between">
+      <div className="z-10 flex flex-col gap-2 border-t border-border/65 bg-[linear-gradient(180deg,hsl(var(--background)/0.9),hsl(var(--background)/0.76))] px-3.5 py-2.5 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] backdrop-blur-xl sm:px-5 sm:py-3 sm:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:flex-row md:items-center md:justify-between md:pb-3">
         <div className={getFeedbackNoticeClass(feedback?.type)}>
           {feedback?.message ?? messages.bookmarkForm.footerHint}
         </div>
-        <div className="flex flex-wrap justify-end gap-2">
+        <div className="flex flex-col justify-end gap-2 sm:flex-row sm:flex-wrap">
           {onCancel && (
-            <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-              {messages.common.cancel}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onCancel}
+              className="w-full sm:w-auto"
+            >
+              {messages.common.close}
             </Button>
           )}
-          <Button type="submit" size="sm" disabled={submitDisabled}>
+          <Button type="submit" size="sm" disabled={submitDisabled} className="w-full sm:w-auto">
             {submitLabel}
           </Button>
         </div>

@@ -5,10 +5,7 @@ services:
     ports:
       - 8080:80
     volumes:
-      - ./config:/app/config
-      # Alternative paths (uncomment one if needed):
-      # - ~/docker/smart-harbor/config:/app/config  # Home directory
-      # - /data/docker/smart-harbor/config:/app/config  # System data directory
+      - ./smart-harbor/config:/app/config
     restart: unless-stopped
     networks:
       - defaultnet

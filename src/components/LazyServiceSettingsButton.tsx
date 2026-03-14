@@ -54,7 +54,7 @@ export function LazyServiceSettingsButton() {
       variant="outline"
       size="icon"
       aria-label={messages.settings.buttonAria}
-      className="h-9 w-9 rounded-full"
+      className="h-10 w-10 rounded-full"
       onClick={() => setOpenOnLoad(true)}
       onMouseEnter={() => {
         void loadServiceSettingsButton()

@@ -9,34 +9,35 @@ export function getToastMeta(messages: MessageSet) {
     success: {
       title: messages.feedback.success,
       icon: CheckCircle2,
-      accentClass: 'bg-emerald-500',
+      accentClass: 'bg-orange-400',
       containerClass:
-        'border-slate-200/90 bg-white/95 text-slate-900 shadow-black/10 dark:border-slate-700/80 dark:bg-slate-900/95 dark:text-slate-100',
-      titleClass: 'text-emerald-700 dark:text-emerald-300',
+        'border-orange-200/70 bg-[linear-gradient(135deg,rgba(250,247,240,0.98),rgba(255,243,232,0.95))] text-stone-900 shadow-[0_20px_45px_rgba(234,88,12,0.1)] dark:border-orange-500/30 dark:bg-[linear-gradient(135deg,rgba(63,37,22,0.96),rgba(91,47,24,0.9))] dark:text-orange-50',
+      titleClass: 'text-orange-800 dark:text-orange-100',
       iconWrapperClass:
-        'bg-emerald-50 ring-1 ring-emerald-200/80 dark:bg-emerald-500/12 dark:ring-emerald-400/20',
-      iconClass: 'text-emerald-700 dark:text-emerald-300',
+        'bg-white/80 ring-1 ring-orange-200/80 dark:bg-white/10 dark:ring-orange-400/20',
+      iconClass: 'text-orange-700 dark:text-orange-200',
     },
     warning: {
       title: messages.feedback.warning,
       icon: AlertTriangle,
       accentClass: 'bg-amber-500',
       containerClass:
-        'border-slate-200/90 bg-white/95 text-slate-900 shadow-black/10 dark:border-slate-700/80 dark:bg-slate-900/95 dark:text-slate-100',
-      titleClass: 'text-amber-700 dark:text-amber-300',
+        'border-amber-200/70 bg-[linear-gradient(135deg,rgba(250,247,240,0.98),rgba(255,247,237,0.96))] text-stone-900 shadow-[0_20px_45px_rgba(245,158,11,0.12)] dark:border-amber-500/30 dark:bg-[linear-gradient(135deg,rgba(68,39,18,0.96),rgba(120,53,15,0.9))] dark:text-amber-50',
+      titleClass: 'text-amber-800 dark:text-amber-100',
       iconWrapperClass:
-        'bg-amber-50 ring-1 ring-amber-200/80 dark:bg-amber-500/12 dark:ring-amber-400/20',
-      iconClass: 'text-amber-700 dark:text-amber-300',
+        'bg-white/80 ring-1 ring-amber-200/80 dark:bg-white/10 dark:ring-amber-400/20',
+      iconClass: 'text-amber-700 dark:text-amber-200',
     },
     error: {
       title: messages.feedback.error,
       icon: XCircle,
       accentClass: 'bg-red-500',
       containerClass:
-        'border-slate-200/90 bg-white/95 text-slate-900 shadow-black/10 dark:border-slate-700/80 dark:bg-slate-900/95 dark:text-slate-100',
-      titleClass: 'text-red-700 dark:text-red-300',
-      iconWrapperClass: 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-500/12 dark:ring-red-400/20',
-      iconClass: 'text-red-700 dark:text-red-300',
+        'border-rose-200/70 bg-[linear-gradient(135deg,rgba(250,247,240,0.98),rgba(255,241,242,0.96))] text-stone-900 shadow-[0_20px_45px_rgba(244,63,94,0.12)] dark:border-rose-500/30 dark:bg-[linear-gradient(135deg,rgba(72,28,36,0.96),rgba(127,29,29,0.9))] dark:text-rose-50',
+      titleClass: 'text-rose-800 dark:text-rose-100',
+      iconWrapperClass:
+        'bg-white/80 ring-1 ring-rose-200/80 dark:bg-white/10 dark:ring-rose-400/20',
+      iconClass: 'text-rose-700 dark:text-rose-200',
     },
   } as const
 }
@@ -44,11 +45,11 @@ export function getToastMeta(messages: MessageSet) {
 export function getFeedbackNoticeClass(type?: FeedbackTone | null) {
   switch (type) {
     case 'success':
-      return 'rounded-lg border border-emerald-200/90 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-950 shadow-sm dark:border-emerald-500/30 dark:bg-emerald-500/12 dark:text-emerald-100'
+      return 'rounded-xl border border-orange-200/70 bg-[linear-gradient(135deg,rgba(250,247,240,0.98),rgba(255,243,232,0.94))] px-3 py-2.5 text-xs leading-5 text-orange-950 shadow-[0_12px_28px_rgba(234,88,12,0.1)] dark:border-orange-500/30 dark:bg-[linear-gradient(135deg,rgba(63,37,22,0.96),rgba(91,47,24,0.88))] dark:text-orange-50'
     case 'warning':
-      return 'rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/12 dark:text-amber-100'
+      return 'rounded-xl border border-amber-200/70 bg-[linear-gradient(135deg,rgba(250,247,240,0.98),rgba(255,247,237,0.94))] px-3 py-2.5 text-xs leading-5 text-amber-950 shadow-[0_12px_28px_rgba(245,158,11,0.1)] dark:border-amber-500/30 dark:bg-[linear-gradient(135deg,rgba(68,39,18,0.96),rgba(120,53,15,0.88))] dark:text-amber-50'
     case 'error':
-      return 'rounded-lg border border-red-200/90 bg-red-50 px-3 py-2 text-xs leading-5 text-red-950 shadow-sm dark:border-red-500/30 dark:bg-red-500/12 dark:text-red-100'
+      return 'rounded-xl border border-rose-200/70 bg-[linear-gradient(135deg,rgba(250,247,240,0.98),rgba(255,241,242,0.94))] px-3 py-2.5 text-xs leading-5 text-rose-950 shadow-[0_12px_28px_rgba(244,63,94,0.1)] dark:border-rose-500/30 dark:bg-[linear-gradient(135deg,rgba(72,28,36,0.96),rgba(127,29,29,0.88))] dark:text-rose-50'
     default:
       return 'text-xs leading-5 text-muted-foreground'
   }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Check, ChevronDown, Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useI18n } from '@/i18n/runtime'
@@ -47,7 +48,14 @@ export function IconPicker({ value, size = 'default', onChange }: IconPickerProp
   const [browseVisibleCount, setBrowseVisibleCount] = useState(BROWSE_PAGE_SIZE)
   const [searchVisibleCount, setSearchVisibleCount] = useState(SEARCH_PAGE_SIZE)
   const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+  const [dropdownStyle, setDropdownStyle] = useState<{
+    top: number
+    left: number
+    width: number
+  } | null>(null)
 
   const isCompact = size === 'sm'
   const normalizedValue = resolveDynamicIconName(value)
@@ -105,6 +113,7 @@ export function IconPicker({ value, size = 'default', onChange }: IconPickerProp
   useEffect(() => {
     if (!isOpen) {
       setKeyword('')
+      setDropdownStyle(null)
       return
     }
 
@@ -122,17 +131,60 @@ export function IconPicker({ value, size = 'default', onChange }: IconPickerProp
     setSearchVisibleCount(SEARCH_PAGE_SIZE)
     searchRef.current?.focus()
 
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false)
+    const updateDropdownPosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect()
+      if (!rect) {
+        return
       }
+
+      const width = Math.min(rect.width, window.innerWidth - 16)
+      const left = Math.min(Math.max(8, rect.left), window.innerWidth - width - 8)
+
+      setDropdownStyle({
+        top: rect.bottom + 8,
+        left,
+        width,
+      })
     }
 
+    updateDropdownPosition()
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node
+
+      if (rootRef.current?.contains(target) || dropdownRef.current?.contains(target)) {
+        return
+      }
+
+      setIsOpen(false)
+    }
+
+    const handleViewportChange = () => {
+      updateDropdownPosition()
+    }
+
+    document.addEventListener('scroll', handleViewportChange, true)
+    window.addEventListener('resize', handleViewportChange)
     document.addEventListener('mousedown', handlePointerDown)
+
     return () => {
+      document.removeEventListener('scroll', handleViewportChange, true)
+      window.removeEventListener('resize', handleViewportChange)
       document.removeEventListener('mousedown', handlePointerDown)
     }
   }, [isOpen, normalizedValue])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      searchRef.current?.focus()
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [isOpen])
 
   useEffect(() => {
     if (!isSearching) {
@@ -171,36 +223,18 @@ export function IconPicker({ value, size = 'default', onChange }: IconPickerProp
     setBrowseVisibleCount((current) => Math.min(filteredOptions.length, current + BROWSE_PAGE_SIZE))
   }
 
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen((current) => !current)}
-        className={cn(
-          'flex w-full items-center justify-between rounded-md border border-input bg-background px-3 text-left shadow-sm transition hover:border-primary/30',
-          isCompact ? 'h-9 text-sm' : 'h-10 text-sm'
-        )}
-      >
-        <span className="flex min-w-0 items-center gap-2">
-          <span
-            className={cn(
-              'rounded-md border border-border/70 bg-muted/35 text-primary/90',
-              isCompact ? 'p-1.5' : 'p-1.5'
-            )}
-          >
-            <ServiceIcon name={value} className="h-4 w-4" />
-          </span>
-          <span className="truncate text-foreground">
-            {value || messages.iconPicker.selectIcon}
-          </span>
-        </span>
-        <ChevronDown
-          className={cn('h-4 w-4 text-muted-foreground transition', isOpen && 'rotate-180')}
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-30 overflow-hidden rounded-xl border border-border/80 bg-popover shadow-2xl">
+  const dropdown = isOpen && dropdownStyle
+    ? createPortal(
+        <div
+          ref={dropdownRef}
+          className="config-panel-card z-[130] overflow-hidden shadow-[0_22px_50px_rgba(109,74,49,0.16)]"
+          style={{
+            position: 'fixed',
+            top: dropdownStyle.top,
+            left: dropdownStyle.left,
+            width: dropdownStyle.width,
+          }}
+        >
           <div className="border-b border-border/70 p-3">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -277,7 +311,7 @@ export function IconPicker({ value, size = 'default', onChange }: IconPickerProp
             </div>
           </div>
 
-          <div className="max-h-72 overflow-y-auto p-2">
+          <div className="config-scroll max-h-72 overflow-y-auto p-2">
             <button
               type="button"
               onClick={() => {
@@ -342,8 +376,41 @@ export function IconPicker({ value, size = 'default', onChange }: IconPickerProp
               </button>
             ) : null}
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+    : null
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className={cn(
+          'config-panel-card-muted flex w-full items-center justify-between px-3 text-left transition hover:border-primary/30',
+          isCompact ? 'h-10 text-sm' : 'h-11 text-sm'
+        )}
+      >
+        <span className="flex min-w-0 items-center gap-2">
+          <span
+            className={cn(
+              'rounded-md border border-border/70 bg-muted/35 text-primary/90',
+              isCompact ? 'p-1.5' : 'p-1.5'
+            )}
+          >
+            <ServiceIcon name={value} className="h-4 w-4" />
+          </span>
+          <span className="truncate text-foreground">
+            {value || messages.iconPicker.selectIcon}
+          </span>
+        </span>
+        <ChevronDown
+          className={cn('h-4 w-4 text-muted-foreground transition', isOpen && 'rotate-180')}
+        />
+      </button>
+
+      {dropdown}
     </div>
   )
 }

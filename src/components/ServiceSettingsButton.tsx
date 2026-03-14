@@ -110,6 +110,11 @@ function formatBackupVersionSize(size: number | null) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`
 }
 
+const sectionCardClass = 'config-panel-card p-4'
+const compactSectionCardClass = 'config-panel-card p-3.5'
+const toggleCardClass =
+  'config-panel-card-muted flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between'
+
 export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsButtonProps) {
   const { data: servicesConfig, refetch } = useServicesConfig()
   const { data: systemConfig, refetch: refetchSystemConfig } = useSystemConfig()
@@ -827,7 +832,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
         size="icon"
         aria-label={messages.settings.buttonAria}
         onClick={openSettings}
-        className="h-9 w-9 rounded-full"
+        className="h-10 w-10 rounded-full"
       >
         <Settings2 className="h-4.5 w-4.5" />
       </Button>
@@ -838,7 +843,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
         title={messages.settings.title}
         description={messages.settings.description}
         icon={Settings2}
-        widthClassName="max-w-5xl"
+        widthClassName="max-w-6xl"
       >
         <ConfigPanelLayout
           panelTitle={messages.settings.panelTitle}
@@ -855,19 +860,22 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   <div className={getFeedbackNoticeClass(systemFeedback?.type)}>
                     {systemFeedback?.message ?? messages.settings.systemSection.footerHint}
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {messages.common.close}
-                  </Button>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full sm:w-auto"
+                    >
+                      {messages.common.close}
+                    </Button>
+                  </div>
                 </>
               }
             >
               <div className="grid gap-3">
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -888,22 +896,15 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                       aria-checked={systemDraft.darkMode}
                       onClick={handleToggleDarkMode}
                       disabled={saveSystemMutation.isPending}
-                      className={`relative inline-flex h-8 w-14 items-center rounded-full border transition ${
-                        systemDraft.darkMode
-                          ? 'border-primary/40 bg-primary/90'
-                          : 'border-border/80 bg-muted'
-                      } ${saveSystemMutation.isPending ? 'opacity-70' : ''}`}
+                      data-checked={systemDraft.darkMode}
+                      className="config-switch"
                     >
-                      <span
-                        className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
-                          systemDraft.darkMode ? 'translate-x-7' : 'translate-x-1'
-                        }`}
-                      />
+                      <span className="config-switch-thumb" />
                     </button>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Languages className="h-4.5 w-4.5 text-primary" />
                     {messages.settings.systemSection.languageTitle}
@@ -918,7 +919,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     <select
                       value={language}
                       onChange={(event) => handleLanguageChange(event.target.value as Language)}
-                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-ring/20"
+                      className="config-panel-select"
                     >
                       <option value="zh-CN">
                         {messages.settings.systemSection.languageChinese}
@@ -927,7 +928,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     </select>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Settings2 className="h-4.5 w-4.5 text-primary" />
                     {messages.settings.systemSection.openBehaviorTitle}
@@ -949,7 +950,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           )
                         }
                         disabled={saveSystemMutation.isPending}
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="config-panel-select"
                       >
                         <option value="self">{messages.settings.systemSection.currentTab}</option>
                         <option value="blank">{messages.settings.systemSection.newTab}</option>
@@ -969,7 +970,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           )
                         }
                         disabled={saveSystemMutation.isPending}
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="config-panel-select"
                       >
                         <option value="self">{messages.settings.systemSection.currentTab}</option>
                         <option value="blank">{messages.settings.systemSection.newTab}</option>
@@ -988,19 +989,45 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   <div className={getFeedbackNoticeClass(accountFeedback?.type)}>
                     {accountFeedback?.message ?? messages.settings.accountSection.footerHint}
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {messages.common.close}
-                  </Button>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full sm:w-auto"
+                    >
+                      {messages.common.close}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                      className="w-full sm:w-auto"
+                    >
+                      {logoutMutation.isPending
+                        ? messages.settings.accountSection.logoutPending
+                        : messages.settings.accountSection.logoutButton}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleUpdateCredentials}
+                      disabled={updateCredentialsMutation.isPending}
+                      className="w-full sm:w-auto"
+                    >
+                      {updateCredentialsMutation.isPending
+                        ? messages.settings.accountSection.updateCredentialsPending
+                        : messages.common.save}
+                    </Button>
+                  </div>
                 </>
               }
             >
               <div className="grid gap-3">
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <KeyRound className="h-4.5 w-4.5 text-primary" />
                     {messages.settings.accountSection.authTitle}
@@ -1016,7 +1043,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                       <Input
                         value={authStatusQuery.data?.username ?? ''}
                         disabled
-                        className="h-9"
+                        className="h-10"
                       />
                     </label>
 
@@ -1030,7 +1057,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           handleCredentialsFieldChange('nextUsername', event.target.value)
                         }
                         autoComplete="username"
-                        className="h-9"
+                        className="h-10"
                       />
                     </label>
 
@@ -1045,7 +1072,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           handleCredentialsFieldChange('currentPassword', event.target.value)
                         }
                         autoComplete="current-password"
-                        className="h-9"
+                        className="h-10"
                       />
                     </label>
 
@@ -1060,7 +1087,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           handleCredentialsFieldChange('nextPassword', event.target.value)
                         }
                         autoComplete="new-password"
-                        className="h-9"
+                        className="h-10"
                       />
                       <p className="text-xs leading-5 text-muted-foreground">
                         {messages.settings.accountSection.passwordPolicyHint}
@@ -1078,32 +1105,9 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           handleCredentialsFieldChange('confirmPassword', event.target.value)
                         }
                         autoComplete="new-password"
-                        className="h-9"
+                        className="h-10"
                       />
                     </label>
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleLogout}
-                      disabled={logoutMutation.isPending}
-                    >
-                      {logoutMutation.isPending
-                        ? messages.settings.accountSection.logoutPending
-                        : messages.settings.accountSection.logoutButton}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleUpdateCredentials}
-                      disabled={updateCredentialsMutation.isPending}
-                    >
-                      {updateCredentialsMutation.isPending
-                        ? messages.settings.accountSection.updateCredentialsPending
-                        : messages.settings.accountSection.updateCredentialsButton}
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -1117,19 +1121,22 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   <div className={getFeedbackNoticeClass(searchFeedback?.type)}>
                     {searchFeedback?.message ?? messages.settings.searchSection.footerHint}
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {messages.common.close}
-                  </Button>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full sm:w-auto"
+                    >
+                      {messages.common.close}
+                    </Button>
+                  </div>
                 </>
               }
             >
               <div className="space-y-3">
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Globe className="h-4.5 w-4.5 text-primary" />
                     {messages.settings.searchSection.defaultTitle}
@@ -1146,7 +1153,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           key={engine.id}
                           className={`flex items-start gap-3 rounded-xl border p-3 transition ${
                             isActive
-                              ? 'border-primary/30 bg-primary/10'
+                              ? 'border-primary/40 bg-primary/10 shadow-[0_14px_28px_hsl(var(--primary)/0.08)]'
                               : 'border-border/70 bg-background/70 hover:border-primary/20 hover:bg-accent/40'
                           }`}
                         >
@@ -1154,15 +1161,26 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                             htmlFor={`search-engine-${engine.id}`}
                             className="flex min-w-0 flex-1 cursor-pointer items-start gap-3"
                           >
-                            <input
-                              id={`search-engine-${engine.id}`}
-                              type="radio"
-                              name="default-search-engine"
-                              className="mt-1 h-4 w-4 accent-primary"
-                              checked={isActive}
-                              disabled={saveSystemMutation.isPending}
-                              onChange={() => handleSelectSearchEngine(engine.id)}
-                            />
+                            <span
+                              className={`mt-1 flex h-4 w-4 items-center justify-center rounded-full border transition ${
+                                isActive
+                                  ? 'border-primary bg-primary/10'
+                                  : 'border-border/80 bg-background'
+                              }`}
+                            >
+                              <input
+                                id={`search-engine-${engine.id}`}
+                                type="radio"
+                                name="default-search-engine"
+                                className="sr-only"
+                                checked={isActive}
+                                disabled={saveSystemMutation.isPending}
+                                onChange={() => handleSelectSearchEngine(engine.id)}
+                              />
+                              <span
+                                className={`h-2 w-2 rounded-full transition ${isActive ? 'bg-primary' : 'bg-transparent'}`}
+                              />
+                            </span>
                             <span className="min-w-0 flex-1">
                               <span className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-medium text-foreground">
@@ -1200,7 +1218,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <Plus className="h-4.5 w-4.5 text-primary" />
                     {messages.settings.searchSection.addCustomTitle}
@@ -1262,6 +1280,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
             <ConfigPanelSection
               title={messages.settings.webdavSection.title}
               summary={messages.settings.webdavSection.summary}
+              bodyClassName="px-3 py-3"
               headerActions={
                 <>
                   <Button
@@ -1300,12 +1319,13 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                             : messages.settings.webdavSection.autoBackupOff
                           : messages.settings.webdavSection.savedConfigMissing)}
                   </div>
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setIsOpen(false)}
+                      className="w-full sm:w-auto"
                     >
                       {messages.common.close}
                     </Button>
@@ -1318,6 +1338,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                         runWebdavBackupMutation.isPending ||
                         restoreWebdavBackupMutation.isPending
                       }
+                      className="w-full sm:w-auto"
                     >
                       <Save className="h-4 w-4" />
                       {messages.common.save}
@@ -1326,9 +1347,9 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                 </>
               }
             >
-              <div className="grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-                <div className="space-y-3">
-                  <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+              <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+                <div className="space-y-2.5">
+                  <div className={compactSectionCardClass}>
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                       <Globe className="h-4.5 w-4.5 text-primary" />
                       {messages.settings.webdavSection.connectionTitle}
@@ -1336,7 +1357,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
                       {messages.settings.webdavSection.connectionHint}
                     </p>
-                    <div className="mt-3 grid gap-3">
+                    <div className="mt-3 grid gap-2.5">
                       <label className="space-y-1.5">
                         <span className="text-xs font-medium text-muted-foreground">
                           {messages.settings.webdavSection.urlLabel}
@@ -1347,12 +1368,9 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           placeholder="https://dav.example.com/remote.php/dav/files/admin"
                           disabled={saveSystemMutation.isPending}
                         />
-                        <p className="text-xs leading-5 text-muted-foreground">
-                          {messages.settings.webdavSection.urlHint}
-                        </p>
                       </label>
 
-                      <div className="grid gap-3 md:grid-cols-2">
+                      <div className="grid gap-2.5 md:grid-cols-2">
                         <label className="space-y-1.5">
                           <span className="text-xs font-medium text-muted-foreground">
                             {messages.settings.webdavSection.usernameLabel}
@@ -1402,7 +1420,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                  <div className={compactSectionCardClass}>
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                       <Settings2 className="h-4.5 w-4.5 text-primary" />
                       {messages.settings.webdavSection.strategyTitle}
@@ -1410,8 +1428,8 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
                       {messages.settings.webdavSection.strategyHint}
                     </p>
-                    <div className="mt-3 grid gap-3">
-                      <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/15 p-3 md:flex-row md:items-center md:justify-between">
+                    <div className="mt-3 grid gap-2.5">
+                      <div className={toggleCardClass}>
                         <div>
                           <div className="text-sm font-medium text-foreground">
                             {messages.settings.webdavSection.autoBackupLabel}
@@ -1426,21 +1444,14 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           aria-checked={backupDraft.autoBackup}
                           onClick={handleToggleAutoBackup}
                           disabled={saveSystemMutation.isPending}
-                          className={`relative inline-flex h-8 w-14 items-center rounded-full border transition ${
-                            backupDraft.autoBackup
-                              ? 'border-primary/40 bg-primary/90'
-                              : 'border-border/80 bg-muted'
-                          } ${saveSystemMutation.isPending ? 'opacity-70' : ''}`}
+                          data-checked={backupDraft.autoBackup}
+                          className="config-switch"
                         >
-                          <span
-                            className={`inline-block h-6 w-6 rounded-full bg-white shadow transition ${
-                              backupDraft.autoBackup ? 'translate-x-7' : 'translate-x-1'
-                            }`}
-                          />
+                          <span className="config-switch-thumb" />
                         </button>
                       </div>
 
-                      <div className="grid gap-3 md:grid-cols-2">
+                      <div className="grid gap-2.5 md:grid-cols-2">
                         <label className="space-y-1.5">
                           <span className="text-xs font-medium text-muted-foreground">
                             {messages.settings.webdavSection.intervalDaysLabel}
@@ -1477,7 +1488,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border/80 bg-background/80 p-4 shadow-sm">
+                <div className={compactSectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <FileJson className="h-4.5 w-4.5 text-primary" />
                     {messages.settings.webdavSection.versionsTitle}
@@ -1486,7 +1497,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     {messages.settings.webdavSection.versionsHint}
                   </p>
 
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-1.5">
                     {!webdavVersionsEnabled ? (
                       <div className="rounded-xl border border-dashed border-border/70 bg-muted/15 px-4 py-5 text-sm text-muted-foreground">
                         {messages.settings.webdavSection.savedConfigMissing}
@@ -1503,7 +1514,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                       webdavBackupVersionsQuery.data.map((version, index) => (
                         <div
                           key={version.id}
-                          className="rounded-xl border border-border/70 bg-background/70 p-3"
+                          className="config-panel-card-muted p-2.5"
                         >
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
@@ -1589,18 +1600,19 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   </Button>
                 </>
               }
-              bodyClassName="overflow-hidden px-5 py-4"
+              bodyClassName="overflow-visible px-5 py-4 md:overflow-hidden"
               footer={
                 <>
                   <div className={getFeedbackNoticeClass(jsonFeedback?.type)}>
                     {jsonFeedback?.message ?? messages.settings.jsonSection.footerHint}
                   </div>
-                  <div className="flex flex-wrap justify-end gap-2">
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setIsOpen(false)}
+                      className="w-full sm:w-auto"
                     >
                       {messages.common.close}
                     </Button>
@@ -1609,9 +1621,10 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                       size="sm"
                       onClick={handleSaveJson}
                       disabled={saveAppMutation.isPending}
+                      className="w-full sm:w-auto"
                     >
                       <Save className="h-4 w-4" />
-                      {messages.common.saveConfig}
+                      {messages.common.save}
                     </Button>
                   </div>
                 </>
@@ -1624,7 +1637,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   setJsonFeedback(null)
                 }}
                 spellCheck={false}
-                className="h-full min-h-[340px] w-full resize-none rounded-xl border border-border/80 bg-muted/20 px-3 py-2.5 font-mono text-[11px] leading-5 text-foreground outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-ring/20"
+                className="config-panel-textarea h-full min-h-[340px] resize-none font-mono text-[11px] leading-5"
               />
             </ConfigPanelSection>
           )}

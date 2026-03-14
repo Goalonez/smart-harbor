@@ -49,18 +49,17 @@ export function HeroClock() {
     () => formatClock(now, language),
     [language, now]
   )
-
   return (
-    <>
+    <div className="flex flex-col items-center">
       <p
         data-role="hero-title"
-        className="animate-slide-up text-[11px] font-medium tracking-[0.22em] text-muted-foreground [animation-delay:60ms] md:text-sm"
+        className="animate-slide-up rounded-full border border-border/70 bg-background px-2.5 py-0.5 text-[9px] font-medium tracking-[0.18em] text-muted-foreground shadow-[0_6px_14px_rgba(15,23,42,0.04)] [animation-delay:60ms] md:text-[10px]"
       >
         {dateText} · {weekdayText}
       </p>
-      <h2 className="mt-1.5 animate-slide-up font-display text-2xl font-bold tracking-tight tabular-nums text-foreground [animation-delay:140ms] md:text-4xl">
-        {timeText}
+      <h2 className="mt-2 animate-slide-up pr-1 font-display text-[1.75rem] font-semibold tracking-[-0.04em] tabular-nums text-foreground [animation-delay:140ms] sm:text-[2.1rem] md:text-[2.55rem]">
+        <span>{timeText}</span>
       </h2>
-    </>
+    </div>
   )
 }
