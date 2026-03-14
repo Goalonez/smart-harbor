@@ -1,10 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, HelpCircle, Wifi, WifiOff } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { LazyBookmarkManageButton } from './LazyBookmarkManageButton'
 import { LazyServiceSettingsButton } from './LazyServiceSettingsButton'
 import { useI18n } from '@/i18n/runtime'
 import { useSystemConfig } from '@/features/config/useSystemConfig'
 import { useAppStore } from '@/store/appStore'
+
+const REPOSITORY_URL = 'https://github.com/Goalonez/smart-harbor'
+
+function GitHubMarkIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="h-4.5 w-4.5">
+      <path
+        fill="currentColor"
+        d="M12 .5C5.65.5.5 5.66.5 12.02c0 5.09 3.3 9.4 7.88 10.92.58.11.8-.25.8-.57v-2.02c-3.2.69-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.69-1.28-1.69-1.04-.72.08-.71.08-.71 1.15.08 1.75 1.19 1.75 1.19 1.02 1.76 2.68 1.25 3.33.95.1-.74.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.06 0 0 .97-.31 3.17 1.18a10.97 10.97 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.77.11 3.06.73.81 1.18 1.84 1.18 3.1 0 4.42-2.68 5.39-5.24 5.67.41.36.77 1.06.77 2.15v3.19c0 .31.21.68.81.57a11.53 11.53 0 0 0 7.87-10.92C23.5 5.66 18.35.5 12 .5Z"
+      />
+    </svg>
+  )
+}
 
 export function TopBar() {
   const networkMode = useAppStore((state) => state.networkMode)
@@ -148,6 +162,22 @@ export function TopBar() {
         <div className="flex shrink-0 items-center gap-2">
           <LazyBookmarkManageButton />
           <LazyServiceSettingsButton />
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            className="hidden h-10 w-10 rounded-full sm:inline-flex"
+          >
+            <a
+              href={REPOSITORY_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={messages.topBar.githubButtonAria}
+              title={messages.topBar.githubButtonAria}
+            >
+              <GitHubMarkIcon />
+            </a>
+          </Button>
         </div>
       </div>
     </div>

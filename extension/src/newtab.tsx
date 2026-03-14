@@ -37,6 +37,14 @@ export function App() {
   const [showLoadingUi, setShowLoadingUi] = useState(false)
 
   useEffect(() => {
+    document.body.dataset.page = 'newtab'
+
+    return () => {
+      delete document.body.dataset.page
+    }
+  }, [])
+
+  useEffect(() => {
     const timerId = window.setTimeout(() => setShowLoadingUi(true), LOADING_UI_DELAY_MS)
     return () => window.clearTimeout(timerId)
   }, [])

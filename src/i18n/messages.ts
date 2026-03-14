@@ -32,6 +32,7 @@ const zhCN = {
     builtIn: '内置',
     custom: '自定义',
     searchPlaceholder: '搜索',
+    searchEngineSwitcherAria: '切换搜索引擎',
     itemCount: (count: number) => `${count} 项`,
     bookmarkCount: (count: number) => `共 ${count} 个书签`,
     closeToast: '关闭提示',
@@ -51,6 +52,7 @@ const zhCN = {
   },
   topBar: {
     network: '网络',
+    githubButtonAria: '打开 GitHub 仓库',
     networkMode: {
       lan: '局域网',
       wan: '外网',
@@ -103,7 +105,7 @@ const zhCN = {
     buttonAria: '管理分组和添加书签',
     title: '分组与书签',
     description: '集中维护首页分组与书签，调整后会立即同步到首页。',
-    panelTitle: '功能面板',
+    panelTitle: '配置分类',
     importSection: {
       label: '导入书签',
       description: '导入浏览器书签',
@@ -412,6 +414,7 @@ const en: typeof zhCN = {
     builtIn: 'Built-in',
     custom: 'Custom',
     searchPlaceholder: 'Search',
+    searchEngineSwitcherAria: 'Switch search engine',
     itemCount: (count: number) => `${count} items`,
     bookmarkCount: (count: number) => `${count} bookmarks`,
     closeToast: 'Close notification',
@@ -431,6 +434,7 @@ const en: typeof zhCN = {
   },
   topBar: {
     network: 'Network',
+    githubButtonAria: 'Open GitHub repository',
     networkMode: {
       lan: 'LAN',
       wan: 'WAN',
@@ -488,7 +492,7 @@ const en: typeof zhCN = {
     title: 'Groups & Bookmarks',
     description:
       'Manage homepage groups and bookmarks here. Changes sync to the homepage immediately.',
-    panelTitle: 'Actions',
+    panelTitle: 'Config Sections',
     importSection: {
       label: 'Import Bookmarks',
       description: 'Import browser bookmarks',

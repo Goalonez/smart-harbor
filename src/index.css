@@ -146,8 +146,17 @@
     padding: 0.75rem 0.875rem;
     font-size: 0.875rem;
     line-height: 1.5;
+    appearance: none;
+    -webkit-appearance: none;
+    background-clip: padding-box;
     outline: none;
     resize: vertical;
+  }
+
+  .bookmark-form-probes {
+    appearance: none;
+    -webkit-appearance: none;
+    background-clip: padding-box;
   }
 
   .config-panel-select:focus,

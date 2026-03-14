@@ -37,6 +37,7 @@ export function BookmarkForm({
 }: BookmarkFormProps) {
   const { messages } = useI18n()
   const fieldCardClass = 'config-panel-card-muted space-y-1.5 p-3'
+  const compactFieldCardClass = 'config-panel-card-muted space-y-1 p-2.5'
   const fieldLabelClass =
     'text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/90'
 
@@ -48,7 +49,7 @@ export function BookmarkForm({
         onSubmit()
       }}
     >
-      <div className="config-scroll min-h-0 flex-1 overflow-y-auto px-4 py-3 pb-6 sm:px-5 sm:py-4">
+      <div className="config-scroll min-h-0 flex-1 overflow-y-auto px-3.5 py-3 pb-5 sm:px-5 sm:py-4 sm:pb-6">
         <div className="grid gap-3 md:grid-cols-2">
           {config.length === 0 ? (
             <label className={`${fieldCardClass} md:col-span-2`}>
@@ -147,29 +148,29 @@ export function BookmarkForm({
             </p>
           </label>
 
-          <div className="md:col-span-2 md:grid md:grid-cols-[minmax(0,1.45fr)_minmax(15rem,1fr)] md:gap-3">
-            <label className={fieldCardClass}>
+          <div className="grid gap-3 md:col-span-2 md:grid-cols-[minmax(0,1.45fr)_minmax(15rem,1fr)]">
+            <label className={compactFieldCardClass}>
               <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.probes}</span>
               <textarea
                 value={values.probesText}
                 onChange={(event) => onFieldChange('probesText', event.target.value)}
                 spellCheck={false}
                 rows={2}
-                className="config-panel-textarea min-h-[6rem] resize-y"
+                className="bookmark-form-probes config-panel-textarea min-h-[5.25rem] resize-y"
                 placeholder={messages.common.probePlaceholder}
               />
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
                 {messages.bookmarkForm.probesHint}
               </p>
             </label>
 
-            <div className="mt-3 md:mt-0">
-              <div className="config-panel-card flex h-full flex-col justify-between gap-3 p-3">
+            <div className="min-w-0">
+              <div className="config-panel-card flex h-full flex-col justify-between gap-2.5 p-2.5">
                 <div>
-                  <div className="text-[13px] font-medium text-foreground">
+                  <div className="text-[12px] font-medium text-foreground sm:text-[13px]">
                     {messages.bookmarkForm.forceNewTab}
                   </div>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
                     {messages.bookmarkForm.forceNewTabHint}
                   </p>
                 </div>
@@ -189,7 +190,7 @@ export function BookmarkForm({
         </div>
       </div>
 
-      <div className="z-10 flex flex-col gap-2 border-t border-border/65 bg-[linear-gradient(180deg,hsl(var(--background)/0.9),hsl(var(--background)/0.76))] px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur-xl sm:px-5 md:flex-row md:items-center md:justify-between md:pb-3">
+      <div className="z-10 flex flex-col gap-2 border-t border-border/65 bg-[linear-gradient(180deg,hsl(var(--background)/0.9),hsl(var(--background)/0.76))] px-3.5 py-2.5 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] backdrop-blur-xl sm:px-5 sm:py-3 sm:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:flex-row md:items-center md:justify-between md:pb-3">
         <div className={getFeedbackNoticeClass(feedback?.type)}>
           {feedback?.message ?? messages.bookmarkForm.footerHint}
         </div>
