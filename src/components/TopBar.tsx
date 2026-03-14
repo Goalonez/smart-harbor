@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { LazyBookmarkManageButton } from './LazyBookmarkManageButton'
 import { LazyServiceSettingsButton } from './LazyServiceSettingsButton'
 import { useI18n } from '@/i18n/runtime'
+import { cn } from '@/lib/utils'
 import { useSystemConfig } from '@/features/config/useSystemConfig'
 import { useAppStore } from '@/store/appStore'
 
@@ -22,6 +23,10 @@ function GitHubMarkIcon() {
 
 export function TopBar() {
   const networkMode = useAppStore((state) => state.networkMode)
+  const networkModeStrategy = useAppStore((state) => state.networkModeStrategy)
+  const manualNetworkMode = useAppStore((state) => state.manualNetworkMode)
+  const setManualNetworkMode = useAppStore((state) => state.setManualNetworkMode)
+  const setNetworkModeStrategy = useAppStore((state) => state.setNetworkModeStrategy)
   const setTheme = useAppStore((state) => state.setTheme)
   const { data: systemConfig } = useSystemConfig()
   const { messages } = useI18n()
@@ -82,6 +87,14 @@ export function TopBar() {
     unknown: 'border-border/70 bg-muted/60 text-muted-foreground',
   }[networkMode]
 
+  const networkOptionButtonClass = (active: boolean) =>
+    cn(
+      'min-h-11 rounded-xl border px-2.5 py-2 text-center text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35',
+      active
+        ? 'border-primary/35 bg-primary/12 text-foreground shadow-[0_10px_24px_hsl(var(--primary)/0.12)]'
+        : 'border-border/75 bg-background/75 text-muted-foreground hover:-translate-y-0.5 hover:border-primary/20 hover:bg-accent/50 hover:text-foreground'
+    )
+
   return (
     <div className="sticky top-0 z-50 px-3 pt-2 sm:px-4 sm:pt-3">
       <div className="container mx-auto flex h-[3.6rem] max-w-[92rem] items-center justify-between gap-3 rounded-[1.2rem] border border-border/75 bg-background/84 px-3.5 shadow-[0_14px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/66 sm:px-4 dark:shadow-[0_18px_40px_rgba(0,0,0,0.26)]">
@@ -129,10 +142,63 @@ export function TopBar() {
                   {messages.topBar.networkInfo.summary}
                 </p>
                 <div className="mt-3 rounded-xl border border-border/70 bg-stone-100/90 px-3 py-2 text-xs text-foreground dark:bg-stone-900/88">
-                  <span className="text-muted-foreground">
-                    {messages.topBar.networkInfo.currentMode}：
-                  </span>
-                  <span className="ml-1 font-medium">{networkLabel}</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">
+                      {messages.topBar.networkInfo.currentMode}：
+                    </span>
+                    <span className="font-medium">{networkLabel}</span>
+                  </div>
+                </div>
+                <div className="mt-3 rounded-xl border border-border/70 bg-background/82 px-3 py-3 dark:bg-stone-900/72">
+                  <p className="text-xs font-medium text-foreground">
+                    {messages.topBar.networkInfo.strategyLabel}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    {messages.topBar.networkInfo.autoHint}
+                  </p>
+                  <div
+                    className="mt-3 grid grid-cols-3 gap-2"
+                    role="group"
+                    aria-label={messages.topBar.networkInfo.strategyLabel}
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={networkModeStrategy === 'auto'}
+                      onClick={() => setNetworkModeStrategy('auto')}
+                      className={networkOptionButtonClass(networkModeStrategy === 'auto')}
+                    >
+                      {messages.topBar.networkInfo.strategyAuto}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={networkModeStrategy === 'manual' && manualNetworkMode === 'lan'}
+                      onClick={() => {
+                        setManualNetworkMode('lan')
+                        setNetworkModeStrategy('manual')
+                      }}
+                      className={networkOptionButtonClass(
+                        networkModeStrategy === 'manual' && manualNetworkMode === 'lan'
+                      )}
+                    >
+                      {messages.topBar.networkMode.lan}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={networkModeStrategy === 'manual' && manualNetworkMode === 'wan'}
+                      onClick={() => {
+                        setManualNetworkMode('wan')
+                        setNetworkModeStrategy('manual')
+                      }}
+                      className={networkOptionButtonClass(
+                        networkModeStrategy === 'manual' && manualNetworkMode === 'wan'
+                      )}
+                    >
+                      {messages.topBar.networkMode.wan}
+                    </button>
+                  </div>
+                  <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2.5 text-xs leading-5 text-muted-foreground dark:border-amber-400/20 dark:bg-amber-400/8">
+                    {messages.topBar.networkInfo.manualHint}
+                  </div>
                 </div>
                 <div className="mt-3 space-y-2.5 text-xs leading-5 text-muted-foreground">
                   <p>

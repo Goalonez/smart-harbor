@@ -9,7 +9,8 @@ import { useServices } from '@/features/services/useServices'
 import { detectNetworkMode } from '@/core/network/detectNetworkMode'
 
 export function HomePage() {
-  const setNetworkMode = useAppStore((state) => state.setNetworkMode)
+  const networkModeStrategy = useAppStore((state) => state.networkModeStrategy)
+  const setDetectedNetworkMode = useAppStore((state) => state.setDetectedNetworkMode)
   const error = useAppStore((state) => state.error)
   const { allServices } = useServices()
   const { messages } = useI18n()
@@ -17,8 +18,14 @@ export function HomePage() {
   useEffect(() => {
     let cancelled = false
 
+    if (networkModeStrategy === 'manual') {
+      return () => {
+        cancelled = true
+      }
+    }
+
     if (allServices.length === 0) {
-      setNetworkMode('unknown')
+      setDetectedNetworkMode('unknown')
       return () => {
         cancelled = true
       }
@@ -26,14 +33,14 @@ export function HomePage() {
 
     void detectNetworkMode(allServices).then((mode) => {
       if (!cancelled) {
-        setNetworkMode(mode)
+        setDetectedNetworkMode(mode)
       }
     })
 
     return () => {
       cancelled = true
     }
-  }, [allServices, setNetworkMode])
+  }, [allServices, networkModeStrategy, setDetectedNetworkMode])
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background">

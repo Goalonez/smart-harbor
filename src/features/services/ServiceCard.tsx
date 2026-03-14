@@ -1,22 +1,26 @@
 import type { HTMLAttributes } from 'react'
 import { Card } from '@/components/ui/card'
-import { useSystemConfig } from '@/features/config/useSystemConfig'
-import { defaultSystemConfig } from '@/features/config/api'
 import { resolveTargetUrl } from '@/core/navigation/resolveTargetUrl'
 import { openWithFallback } from '@/core/navigation/openWithFallback'
-import { useAppStore } from '@/store/appStore'
+import type { NetworkMode } from '@/core/network/detectNetworkMode'
 import type { OpenTarget, Service } from '@/config/schema'
 import { cn } from '@/lib/utils'
 import { ServiceIcon } from './ServiceIcon'
 
 interface ServiceCardProps extends HTMLAttributes<HTMLDivElement> {
   service: Service
+  networkMode: NetworkMode
+  clickOpenTarget: OpenTarget
+  middleClickOpenTarget: OpenTarget
   isDragging?: boolean
   isDropTarget?: boolean
 }
 
 export function ServiceCard({
   service,
+  networkMode,
+  clickOpenTarget,
+  middleClickOpenTarget,
   className,
   isDragging,
   isDropTarget,
@@ -24,10 +28,6 @@ export function ServiceCard({
   onMouseDown,
   ...props
 }: ServiceCardProps) {
-  const networkMode = useAppStore((state) => state.networkMode)
-  const { data: systemConfig } = useSystemConfig()
-  const activeSystemConfig = systemConfig ?? defaultSystemConfig
-
   async function openService(target: OpenTarget) {
     const urls = resolveTargetUrl(service, networkMode)
     const openTarget = service.forceNewTab ? 'blank' : target
@@ -41,7 +41,7 @@ export function ServiceCard({
       return
     }
 
-    await openService(activeSystemConfig.clickOpenTarget)
+    await openService(clickOpenTarget)
   }
 
   const handleMouseDown: HTMLAttributes<HTMLDivElement>['onMouseDown'] = (event) => {
@@ -52,7 +52,7 @@ export function ServiceCard({
     }
 
     event.preventDefault()
-    void openService(activeSystemConfig.middleClickOpenTarget)
+    void openService(middleClickOpenTarget)
   }
 
   return (
@@ -70,7 +70,7 @@ export function ServiceCard({
       <div className="pointer-events-none absolute inset-x-3 top-0 h-10 rounded-b-[999px] bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.16),transparent_72%)] opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="relative grid min-h-[54px] grid-cols-[auto_minmax(0,1fr)] items-center gap-2 pl-0.5">
         <div className="flex h-[1.72rem] w-[1.72rem] shrink-0 items-center justify-center rounded-[0.8rem] border border-border/70 bg-background/92 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_18px_hsl(var(--primary)/0.1)] transition-transform duration-300 group-hover:scale-[1.03] group-hover:border-primary/25 group-hover:bg-background">
-          <ServiceIcon name={service.icon} className="h-3 w-3" />
+          <ServiceIcon name={service.icon} className="h-3 w-3" autoLoad={false} />
         </div>
         <div className="flex min-h-[2rem] min-w-0 items-center justify-start pr-0.5">
           <div className="w-full min-w-0 text-left text-[12px] font-semibold leading-[1.28] text-foreground/95 sm:text-[12.5px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-normal">

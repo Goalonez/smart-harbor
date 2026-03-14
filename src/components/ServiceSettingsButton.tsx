@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import {
   Download,
   FileJson,
@@ -114,6 +114,8 @@ const sectionCardClass = 'config-panel-card p-4'
 const compactSectionCardClass = 'config-panel-card p-3.5'
 const toggleCardClass =
   'config-panel-card-muted flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between'
+const accountSettingsFormId = 'account-settings-form'
+const webdavSettingsFormId = 'webdav-settings-form'
 
 export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsButtonProps) {
   const { data: servicesConfig, refetch } = useServicesConfig()
@@ -480,6 +482,11 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
     })
   }
 
+  function handleAccountSettingsSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    handleUpdateCredentials()
+  }
+
   function handleLanguageChange(nextLanguage: Language) {
     if (language === nextLanguage) {
       return
@@ -678,6 +685,11 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
         showToast({ type: 'error', message })
       },
     })
+  }
+
+  function handleWebdavSettingsSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    handleSaveWebdavBackupConfig()
   }
 
   async function handleRefreshWebdavVersions() {
@@ -1012,9 +1024,9 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                         : messages.settings.accountSection.logoutButton}
                     </Button>
                     <Button
-                      type="button"
+                      type="submit"
+                      form={accountSettingsFormId}
                       size="sm"
-                      onClick={handleUpdateCredentials}
                       disabled={updateCredentialsMutation.isPending}
                       className="w-full sm:w-auto"
                     >
@@ -1026,7 +1038,11 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                 </>
               }
             >
-              <div className="grid gap-3">
+              <form
+                id={accountSettingsFormId}
+                className="grid gap-3"
+                onSubmit={handleAccountSettingsSubmit}
+              >
                 <div className={sectionCardClass}>
                   <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <KeyRound className="h-4.5 w-4.5 text-primary" />
@@ -1043,6 +1059,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                       <Input
                         value={authStatusQuery.data?.username ?? ''}
                         disabled
+                        name="currentUsername"
                         className="h-10"
                       />
                     </label>
@@ -1052,6 +1069,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                         {messages.settings.accountSection.nextUsernameLabel}
                       </span>
                       <Input
+                        name="nextUsername"
                         value={credentialsDraft.nextUsername}
                         onChange={(event) =>
                           handleCredentialsFieldChange('nextUsername', event.target.value)
@@ -1066,6 +1084,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                         {messages.settings.accountSection.currentPasswordLabel}
                       </span>
                       <Input
+                        name="currentPassword"
                         type="password"
                         value={credentialsDraft.currentPassword}
                         onChange={(event) =>
@@ -1081,6 +1100,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                         {messages.settings.accountSection.nextPasswordLabel}
                       </span>
                       <Input
+                        name="nextPassword"
                         type="password"
                         value={credentialsDraft.nextPassword}
                         onChange={(event) =>
@@ -1099,6 +1119,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                         {messages.settings.accountSection.confirmPasswordLabel}
                       </span>
                       <Input
+                        name="confirmPassword"
                         type="password"
                         value={credentialsDraft.confirmPassword}
                         onChange={(event) =>
@@ -1110,7 +1131,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     </label>
                   </div>
                 </div>
-              </div>
+              </form>
             </ConfigPanelSection>
           ) : activeSection === 'search-engines' ? (
             <ConfigPanelSection
@@ -1330,9 +1351,9 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                       {messages.common.close}
                     </Button>
                     <Button
-                      type="button"
+                      type="submit"
+                      form={webdavSettingsFormId}
                       size="sm"
-                      onClick={handleSaveWebdavBackupConfig}
                       disabled={
                         saveSystemMutation.isPending ||
                         runWebdavBackupMutation.isPending ||
@@ -1347,7 +1368,11 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                 </>
               }
             >
-              <div className="grid gap-2.5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+              <form
+                id={webdavSettingsFormId}
+                className="grid gap-2.5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]"
+                onSubmit={handleWebdavSettingsSubmit}
+              >
                 <div className="space-y-2.5">
                   <div className={compactSectionCardClass}>
                     <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -1363,6 +1388,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           {messages.settings.webdavSection.urlLabel}
                         </span>
                         <Input
+                          name="url"
                           value={backupDraft.url}
                           onChange={(event) => handleBackupFieldChange('url', event.target.value)}
                           placeholder="https://dav.example.com/remote.php/dav/files/admin"
@@ -1376,6 +1402,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                             {messages.settings.webdavSection.usernameLabel}
                           </span>
                           <Input
+                            name="username"
                             value={backupDraft.username}
                             onChange={(event) =>
                               handleBackupFieldChange('username', event.target.value)
@@ -1390,6 +1417,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                             {messages.settings.webdavSection.passwordLabel}
                           </span>
                           <Input
+                            name="password"
                             type="password"
                             value={backupDraft.password}
                             onChange={(event) =>
@@ -1406,6 +1434,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                           {messages.settings.webdavSection.remotePathLabel}
                         </span>
                         <Input
+                          name="remotePath"
                           value={backupDraft.remotePath}
                           onChange={(event) =>
                             handleBackupFieldChange('remotePath', event.target.value)
@@ -1457,6 +1486,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                             {messages.settings.webdavSection.intervalDaysLabel}
                           </span>
                           <Input
+                            name="intervalDays"
                             type="number"
                             min={1}
                             max={365}
@@ -1473,6 +1503,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                             {messages.settings.webdavSection.maxVersionsLabel}
                           </span>
                           <Input
+                            name="maxVersions"
                             type="number"
                             min={1}
                             max={365}
@@ -1562,7 +1593,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                     )}
                   </div>
                 </div>
-              </div>
+              </form>
             </ConfigPanelSection>
           ) : (
             <ConfigPanelSection
