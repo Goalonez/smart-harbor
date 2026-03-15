@@ -10,7 +10,9 @@ const distDir = path.resolve(extensionDir, 'dist')
 
 const packageJson = JSON.parse(await fs.readFile(path.resolve(rootDir, 'package.json'), 'utf8'))
 const version = process.env.EXTENSION_VERSION || packageJson.version
-const packageBaseName = `smart-harbor-new-tab-v${version}`
+const artifactTag = process.env.EXTENSION_ARTIFACT_TAG || `v${version}`
+const normalizedArtifactTag = artifactTag.startsWith('v') ? artifactTag : `v${artifactTag}`
+const packageBaseName = `smart-harbor-new-tab-${normalizedArtifactTag}`
 const packageDir = path.resolve(extensionDir, packageBaseName)
 const zipPath = path.resolve(extensionDir, `${packageBaseName}.zip`)
 

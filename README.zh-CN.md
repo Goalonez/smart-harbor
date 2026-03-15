@@ -122,7 +122,7 @@ docker run -d \
 | `services[].items[].name` | 书签显示名称 | 非空字符串 |
 | `services[].items[].icon` | Lucide 图标名称 | 可选 |
 | `services[].items[].primaryUrl` | 主地址，通常填局域网地址 | 必填 URL |
-| `services[].items[].secondaryUrl` | 切换地址，通常填公网地址 | 可选 URL |
+| `services[].items[].secondaryUrl` | 切换地址，通常填外网地址 | 可选 URL |
 | `services[].items[].probes[]` | 用于探测当前网络可达性的地址列表 | 可选，至少一个 URL |
 | `services[].items[].forceNewTab` | 是否强制在新标签页打开该书签 | 可选布尔值 |
 
@@ -193,8 +193,8 @@ docker run -d \
 
 如果你希望每次打开 Chrome 新标签页都直接进入 Smart Harbor，可以使用仓库内置插件。
 
-- `primaryUrl`：优先访问的地址，通常填写局域网地址
-- `fallbackUrl`：备用地址，通常填写公网地址
+- `primaryUrl`：主地址，通常填写局域网地址
+- `fallbackUrl`：切换地址，通常填写外网地址
 - `openMode`：`embedded` 表示在新标签页中以内嵌方式打开，`direct` 表示直接跳转
 - `probeTimeoutMs`：地址探测超时时间，默认 `200`
 - 点击浏览器工具栏中的插件图标即可打开设置页

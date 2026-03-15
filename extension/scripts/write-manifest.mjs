@@ -12,7 +12,7 @@ const manifest = {
   manifest_version: 3,
   name: 'Smart Harbor New Tab',
   version,
-  description: 'Use Smart Harbor as the Chrome new tab page with automatic primary/fallback URL switching.',
+  description: 'Use Smart Harbor as the Chrome new tab page with automatic primary/secondary URL switching.',
   permissions: ['storage', 'permissions'],
   optional_host_permissions: ['http://*/*', 'https://*/*'],
   background: {

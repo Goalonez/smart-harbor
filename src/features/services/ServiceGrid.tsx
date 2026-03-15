@@ -1,4 +1,5 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useI18n } from '@/i18n/runtime'
@@ -30,22 +31,33 @@ interface ContextMenuState {
   y: number
 }
 
-const DESKTOP_SECTION_PADDING_PX = 24
+const DESKTOP_SECTION_HORIZONTAL_PADDING_PX = 24
 const DESKTOP_LABEL_WIDTH_PX = 84
-const DESKTOP_CONTENT_GAP_PX = 12
-const DESKTOP_CARD_WIDTH_PX = 130
+const DESKTOP_SECTION_GAP_PX = 12
+const DESKTOP_GRID_HORIZONTAL_PADDING_PX = 12
 const DESKTOP_CARD_GAP_PX = 10
+const DESKTOP_CARD_MIN_WIDTH_PX = 130
 
-function getCompactGroupWidth(cardCount: number) {
-  const totalCardWidth = cardCount * DESKTOP_CARD_WIDTH_PX
-  const totalCardGaps = Math.max(cardCount - 1, 0) * DESKTOP_CARD_GAP_PX
+function getDesktopCardWidth(containerWidth: number, desktopColumnCount: number) {
+  const availableWidth =
+    containerWidth -
+    DESKTOP_SECTION_HORIZONTAL_PADDING_PX -
+    DESKTOP_LABEL_WIDTH_PX -
+    DESKTOP_SECTION_GAP_PX -
+    DESKTOP_GRID_HORIZONTAL_PADDING_PX -
+    Math.max(desktopColumnCount - 1, 0) * DESKTOP_CARD_GAP_PX
 
+  return Math.max(Math.floor(availableWidth / desktopColumnCount), DESKTOP_CARD_MIN_WIDTH_PX)
+}
+
+function getCompactGroupWidth(cardCount: number, desktopCardWidth: number) {
   return (
-    DESKTOP_SECTION_PADDING_PX +
+    DESKTOP_SECTION_HORIZONTAL_PADDING_PX +
     DESKTOP_LABEL_WIDTH_PX +
-    DESKTOP_CONTENT_GAP_PX +
-    totalCardWidth +
-    totalCardGaps
+    DESKTOP_SECTION_GAP_PX +
+    DESKTOP_GRID_HORIZONTAL_PADDING_PX +
+    cardCount * desktopCardWidth +
+    Math.max(cardCount - 1, 0) * DESKTOP_CARD_GAP_PX
   )
 }
 
@@ -62,6 +74,21 @@ export function ServiceGrid() {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [editingSlug, setEditingSlug] = useState<string | null>(null)
   const [gridWidth, setGridWidth] = useState(0)
+  const [desktopColumnCount, setDesktopColumnCount] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 0
+    }
+
+    if (window.innerWidth >= 1280) {
+      return 8
+    }
+
+    if (window.innerWidth >= 1024) {
+      return 6
+    }
+
+    return 0
+  })
   const [, setIconRenderVersion] = useState(0)
   const gridRef = useRef<HTMLDivElement | null>(null)
   const activeSystemConfig = systemConfig ?? defaultSystemConfig
@@ -128,8 +155,30 @@ export function ServiceGrid() {
   }, [contextMenu])
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const updateDesktopColumnCount = () => {
+      setDesktopColumnCount((current) => {
+        const next =
+          window.innerWidth >= 1280 ? 8 : window.innerWidth >= 1024 ? 6 : 0
+
+        return current === next ? current : next
+      })
+    }
+
+    updateDesktopColumnCount()
+    window.addEventListener('resize', updateDesktopColumnCount)
+
+    return () => {
+      window.removeEventListener('resize', updateDesktopColumnCount)
+    }
+  }, [])
+
+  useEffect(() => {
     const element = gridRef.current
-    if (!element || typeof ResizeObserver === 'undefined') {
+    if (!element) {
       return
     }
 
@@ -138,6 +187,10 @@ export function ServiceGrid() {
     }
 
     updateWidth(Math.round(element.getBoundingClientRect().width))
+
+    if (typeof ResizeObserver === 'undefined') {
+      return
+    }
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0]
@@ -257,6 +310,10 @@ export function ServiceGrid() {
 
   const menuLeft = contextMenu ? Math.min(contextMenu.x, window.innerWidth - 180) : 0
   const menuTop = contextMenu ? Math.min(contextMenu.y, window.innerHeight - 120) : 0
+  const desktopCardWidth =
+    desktopColumnCount > 0 && gridWidth > 0
+      ? getDesktopCardWidth(gridWidth, desktopColumnCount)
+      : DESKTOP_CARD_MIN_WIDTH_PX
 
   return (
     <>
@@ -265,8 +322,16 @@ export function ServiceGrid() {
           const isGroupDropTarget =
             dragOver?.groupIndex === group.actualGroupIndex &&
             typeof dragOver.serviceIndex === 'undefined'
-          const compactGroupWidth = getCompactGroupWidth(group.services.length)
-          const canKeepSingleRow = group.services.length > 0 && compactGroupWidth <= gridWidth
+          const compactGroupWidth = getCompactGroupWidth(group.services.length, desktopCardWidth)
+          const canKeepSingleRow =
+            desktopColumnCount > 0 &&
+            group.services.length > 0 &&
+            compactGroupWidth <= gridWidth
+          const compactGridStyle = canKeepSingleRow
+            ? ({
+                '--desktop-card-width': `${desktopCardWidth}px`,
+              } as CSSProperties)
+            : undefined
 
           return (
             <section
@@ -284,7 +349,8 @@ export function ServiceGrid() {
                 </div>
 
                 <div
-                  className={`grid min-h-[76px] w-full flex-1 grid-cols-2 gap-2 rounded-[1.15rem] bg-background/34 p-1 transition sm:grid-cols-3 md:grid-cols-4 md:gap-2.5 md:p-1.5 ${canKeepSingleRow ? 'lg:flex lg:w-fit lg:flex-none lg:flex-nowrap lg:justify-start' : 'lg:grid lg:grid-cols-6 xl:grid-cols-8'} ${isGroupDropTarget ? 'bg-primary/6 ring-1 ring-primary/10' : ''}`}
+                  className={`grid min-h-[76px] w-full flex-1 grid-cols-2 gap-2 rounded-[1.15rem] bg-background/34 p-1 transition sm:grid-cols-3 md:grid-cols-4 md:gap-2.5 md:p-1.5 ${canKeepSingleRow ? 'lg:w-fit lg:flex-none lg:grid-flow-col lg:grid-cols-none lg:auto-cols-[var(--desktop-card-width)]' : 'lg:grid-cols-6 xl:grid-cols-8'} ${isGroupDropTarget ? 'bg-primary/6 ring-1 ring-primary/10' : ''}`}
+                  style={compactGridStyle}
                   onDragOver={(event) => {
                     if (!canDrag || !draggingSlug) {
                       return
@@ -310,7 +376,7 @@ export function ServiceGrid() {
                       return (
                         <div
                           key={service.slug}
-                          className={`transform-gpu animate-slide-up motion-reduce:animate-none ${canKeepSingleRow ? 'lg:w-[8.125rem]' : ''}`}
+                          className="transform-gpu animate-slide-up motion-reduce:animate-none"
                           style={{ animationDelay: `${(groupIndex * 3 + index) * 45}ms` }}
                         >
                           <ServiceCard
