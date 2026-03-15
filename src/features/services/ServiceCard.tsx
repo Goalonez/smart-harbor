@@ -73,7 +73,7 @@ export function ServiceCard({
           <ServiceIcon name={service.icon} className="h-3 w-3" autoLoad={false} />
         </div>
         <div className="flex min-h-[2rem] min-w-0 items-center justify-start pr-0.5">
-          <div className="w-full min-w-0 text-left text-[12px] font-semibold leading-[1.28] text-foreground/95 sm:text-[12.5px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden break-normal">
+          <div className="w-full min-w-0 overflow-hidden text-left text-[12px] font-semibold leading-[1.28] text-foreground/95 break-words sm:text-[12.5px] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
             {service.name}
           </div>
         </div>

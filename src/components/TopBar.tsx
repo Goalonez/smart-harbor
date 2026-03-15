@@ -129,7 +129,7 @@ export function TopBar() {
               <div
                 role="dialog"
                 aria-label={messages.topBar.networkInfo.title}
-                className="fixed top-[4.5rem] right-3 left-3 z-[100] max-h-[calc(100vh-5.25rem)] overflow-y-auto rounded-[1.2rem] border border-stone-200/90 bg-stone-50 p-4 text-left shadow-[0_24px_60px_rgba(15,23,42,0.22)] ring-1 ring-stone-900/5 backdrop-blur-xl sm:absolute sm:top-full sm:right-auto sm:left-0 sm:mt-2.5 sm:w-[22rem] sm:max-h-[min(28rem,calc(100vh-7rem))] dark:border-stone-700/80 dark:bg-stone-950 dark:ring-white/10 dark:shadow-[0_28px_70px_rgba(0,0,0,0.5)]"
+                className="fixed top-[4.5rem] right-3 left-3 z-[100] max-h-[calc(100vh-5.25rem)] overflow-y-auto rounded-[1.2rem] border border-stone-200/90 bg-stone-50 p-4 text-left shadow-[0_24px_60px_rgba(15,23,42,0.22)] ring-1 ring-stone-900/5 backdrop-blur-xl sm:absolute sm:top-full sm:right-auto sm:left-0 sm:mt-2.5 sm:w-[22rem] sm:max-h-none sm:overflow-visible dark:border-stone-700/80 dark:bg-stone-950 dark:ring-white/10 dark:shadow-[0_28px_70px_rgba(0,0,0,0.5)]"
               >
                 <div
                   aria-hidden="true"

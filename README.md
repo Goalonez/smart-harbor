@@ -193,8 +193,8 @@ On first start, Smart Harbor writes a single `config.json` into your mounted con
 
 Use the bundled extension when you want every Chrome new tab to open Smart Harbor.
 
-- `primaryUrl`: first address to try, usually your LAN URL
-- `fallbackUrl`: backup address, usually your public URL
+- `primaryUrl`: primary URL, usually your LAN URL
+- `fallbackUrl`: secondary URL, usually your WAN URL
 - `openMode`: `embedded` keeps Smart Harbor inside the new tab page; `direct` redirects immediately
 - `probeTimeoutMs`: request timeout for address detection, default `200`
 - Clicking the extension toolbar icon opens the settings page
