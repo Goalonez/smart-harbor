@@ -43,6 +43,26 @@ describe('systemConfigSchema', () => {
     expect(config.defaultSearchEngine).toBe('google')
     expect(config.customSearchEngines).toEqual([])
     expect(config.darkMode).toBe(false)
+    expect(config.networkProbe).toEqual({
+      lanProtocol: 'http',
+      lanHost: '',
+      wanProtocol: 'https',
+      wanHost: '',
+    })
+  })
+
+  it('rejects invalid network probe hosts', () => {
+    expect(() =>
+      systemConfigSchema.parse({
+        appName: 'Smart Harbor',
+        networkProbe: {
+          lanProtocol: 'http',
+          lanHost: 'https://192.168.1.10/api/health',
+          wanProtocol: 'https',
+          wanHost: 'harbor.example.com',
+        },
+      })
+    ).toThrow('不要包含协议或路径')
   })
 
   it('rejects invalid custom search templates', () => {

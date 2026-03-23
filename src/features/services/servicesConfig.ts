@@ -1,3 +1,4 @@
+import { pinyin } from 'pinyin-pro'
 import { defaultServicesConfig as bundledDefaultServicesConfig } from '@/config/defaultConfig'
 import {
   serviceConfigSchema,
@@ -98,19 +99,33 @@ export function cleanServiceConfig(service: ServiceConfig): ServiceConfig {
   })
 }
 
-export function slugify(value: string) {
-  const normalized = value
-    .trim()
+function transliterateSlugSource(value: string) {
+  return pinyin(value.trim(), {
+    toneType: 'none',
+    nonZh: 'consecutive',
+    v: true,
+  })
+}
+
+export function slugify(value: string, fallback = 'service') {
+  const normalized = transliterateSlugSource(value)
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
-  return normalized || 'service'
+  return normalized || fallback
 }
 
-export function buildUniqueSlug(name: string, config: ServicesConfig, currentSlug?: string) {
-  const base = slugify(name)
+export function buildUniqueSlug(
+  name: string,
+  config: ServicesConfig,
+  currentSlug?: string,
+  fallback = 'service'
+) {
+  const base = slugify(name, fallback)
   const occupied = new Set(
     config
       .flatMap((group) => group.items.map((service) => service.slug))

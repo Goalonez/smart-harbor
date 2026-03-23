@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { ServicesConfig } from '@/config/schema'
 import { validateBookmarkForm } from '@/features/services/bookmarkForm'
-import { moveGroup, moveService, validateGroupName } from '@/features/services/servicesConfig'
+import {
+  moveGroup,
+  moveService,
+  slugify,
+  validateGroupName,
+} from '@/features/services/servicesConfig'
 
 const sampleConfig: ServicesConfig = [
   {
@@ -35,6 +40,18 @@ const sampleConfig: ServicesConfig = [
 ]
 
 describe('servicesConfig helpers', () => {
+  it('transliterates Chinese bookmark names to pinyin slugs', () => {
+    expect(slugify('测试书签')).toBe('ce-shi-shu-qian')
+  })
+
+  it('keeps consecutive non-Chinese text together when transliterating slugs', () => {
+    expect(slugify('OpenAI助手')).toBe('openai-zhu-shou')
+  })
+
+  it('falls back when the bookmark name still cannot be transliterated', () => {
+    expect(slugify('🚀✨', 'service-4')).toBe('service-4')
+  })
+
   it('validates group names after trimming', () => {
     expect(validateGroupName('  新分组  ', sampleConfig)).toBe('新分组')
   })
@@ -75,7 +92,6 @@ describe('validateBookmarkForm', () => {
         icon: '',
         primaryUrl: 'http://127.0.0.1:8080',
         secondaryUrl: 'https://example.com',
-        probesText: 'https://example.com/health',
         forceNewTab: false,
       },
       []
@@ -84,7 +100,6 @@ describe('validateBookmarkForm', () => {
     expect(result.newGroupName).toBe('常用')
     expect(result.targetGroupIndex).toBe(0)
     expect(result.service.slug).toBe('new-item')
-    expect(result.service.probes).toEqual(['https://example.com/health'])
     expect(result.service.forceNewTab).toBeUndefined()
   })
 
@@ -98,13 +113,49 @@ describe('validateBookmarkForm', () => {
         icon: '',
         primaryUrl: 'http://127.0.0.1:8080',
         secondaryUrl: 'https://vault.example.com',
-        probesText: '',
         forceNewTab: true,
       },
       sampleConfig
     )
 
     expect(result.service.forceNewTab).toBe(true)
+  })
+
+  it('generates a pinyin slug when creating a Chinese bookmark with an empty slug', () => {
+    const result = validateBookmarkForm(
+      {
+        groupIndex: '0',
+        newGroupName: '',
+        name: '测试书签',
+        slug: '',
+        icon: '',
+        primaryUrl: 'http://127.0.0.1:8080',
+        secondaryUrl: 'https://example.com',
+        forceNewTab: false,
+      },
+      sampleConfig
+    )
+
+    expect(result.service.slug).toBe('ce-shi-shu-qian')
+  })
+
+  it('regenerates the current bookmark slug to pinyin when editing a Chinese name with an empty slug', () => {
+    const result = validateBookmarkForm(
+      {
+        groupIndex: '0',
+        newGroupName: '',
+        name: '测试书签',
+        slug: '',
+        icon: '',
+        primaryUrl: 'http://127.0.0.1:3001',
+        secondaryUrl: 'https://beta.example.com',
+        forceNewTab: false,
+      },
+      sampleConfig,
+      { currentSlug: 'beta' }
+    )
+
+    expect(result.service.slug).toBe('ce-shi-shu-qian')
   })
 
   it('rejects duplicate bookmark slugs', () => {
@@ -118,7 +169,6 @@ describe('validateBookmarkForm', () => {
           icon: '',
           primaryUrl: 'http://127.0.0.1:8080',
           secondaryUrl: 'https://example.com',
-          probesText: '',
           forceNewTab: false,
         },
         sampleConfig

@@ -211,7 +211,7 @@ export function BookmarkManageButton({ initialOpen = false }: BookmarkManageButt
       const nextDraft = { ...current, [field]: value } as BookmarkFormValues
 
       if (field === 'name' && !bookmarkSlugTouched) {
-        nextDraft.slug = buildSuggestedSlug(String(value), activeConfig)
+        nextDraft.slug = buildSuggestedSlug(String(value), activeConfig, undefined, current.slug)
       }
 
       return nextDraft

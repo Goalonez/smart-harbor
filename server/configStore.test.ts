@@ -47,6 +47,12 @@ describe('configStore', () => {
       middleClickOpenTarget: 'blank',
       defaultSearchEngine: 'google',
       customSearchEngines: [],
+      networkProbe: {
+        lanProtocol: 'http',
+        lanHost: '',
+        wanProtocol: 'https',
+        wanHost: '',
+      },
       webdavBackup: {
         url: '',
         username: '',
@@ -93,6 +99,12 @@ describe('configStore', () => {
       middleClickOpenTarget: 'blank',
       defaultSearchEngine: 'google',
       customSearchEngines: [],
+      networkProbe: {
+        lanProtocol: 'http',
+        lanHost: '',
+        wanProtocol: 'https',
+        wanHost: '',
+      },
       webdavBackup: {
         url: '',
         username: '',
@@ -146,6 +158,12 @@ describe('configStore', () => {
         middleClickOpenTarget: 'blank',
         defaultSearchEngine: 'google',
         customSearchEngines: [],
+        networkProbe: {
+          lanProtocol: 'http',
+          lanHost: '',
+          wanProtocol: 'https',
+          wanHost: '',
+        },
         webdavBackup: {
           url: '',
           username: '',
@@ -186,6 +204,12 @@ describe('configStore', () => {
         middleClickOpenTarget: 'blank',
         defaultSearchEngine: 'google',
         customSearchEngines: [],
+        networkProbe: {
+          lanProtocol: 'http',
+          lanHost: '',
+          wanProtocol: 'https',
+          wanHost: '',
+        },
         webdavBackup: {
           url: '',
           username: '',
@@ -212,6 +236,12 @@ describe('configStore', () => {
         middleClickOpenTarget: 'blank',
         defaultSearchEngine: 'google',
         customSearchEngines: [],
+        networkProbe: {
+          lanProtocol: 'http',
+          lanHost: '',
+          wanProtocol: 'https',
+          wanHost: '',
+        },
         webdavBackup: {
           url: '',
           username: '',

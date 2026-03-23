@@ -13,8 +13,14 @@ import {
   Sun,
   Trash2,
   Upload,
+  Wifi,
   WandSparkles,
 } from 'lucide-react'
+import {
+  buildNetworkProbeUrl,
+  hasCompleteNetworkProbeConfig,
+  NETWORK_PROBE_PATH,
+} from '@/config/networkProbe'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ConfigPanelLayout, ConfigPanelSection } from '@/components/ConfigPanelLayout'
@@ -115,6 +121,7 @@ const compactSectionCardClass = 'config-panel-card p-3.5'
 const toggleCardClass =
   'config-panel-card-muted flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between'
 const accountSettingsFormId = 'account-settings-form'
+const networkProbeSettingsFormId = 'network-probe-settings-form'
 const webdavSettingsFormId = 'webdav-settings-form'
 
 export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsButtonProps) {
@@ -137,7 +144,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [isOpen, setIsOpen] = useState(initialOpen)
   const [activeSection, setActiveSection] = useState<
-    'system' | 'account' | 'search-engines' | 'webdav-backup' | 'config-json'
+    'system' | 'network-probe' | 'account' | 'search-engines' | 'webdav-backup' | 'config-json'
   >('system')
   const [jsonDraft, setJsonDraft] = useState(formatAppConfig(defaultAppConfig))
   const [systemDraft, setSystemDraft] = useState(defaultSystemConfig)
@@ -148,6 +155,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
   const [customEngineUrl, setCustomEngineUrl] = useState('')
   const [jsonFeedback, setJsonFeedback] = useState<FeedbackState | null>(null)
   const [systemFeedback, setSystemFeedback] = useState<FeedbackState | null>(null)
+  const [networkFeedback, setNetworkFeedback] = useState<FeedbackState | null>(null)
   const [accountFeedback, setAccountFeedback] = useState<FeedbackState | null>(null)
   const [searchFeedback, setSearchFeedback] = useState<FeedbackState | null>(null)
   const [backupFeedback, setBackupFeedback] = useState<FeedbackState | null>(null)
@@ -179,6 +187,13 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
   )
   const selectedSearchEngineName = getLocalizedSearchEngineName(language, selectedSearchEngine)
   const isWebdavBackupDirty = !isWebdavBackupConfigEqual(backupDraft, savedWebdavBackupConfig)
+  const hasConfiguredNetworkProbe = hasCompleteNetworkProbeConfig(systemDraft.networkProbe)
+  const lanProbePreview = systemDraft.networkProbe.lanHost.trim()
+    ? buildNetworkProbeUrl(systemDraft.networkProbe.lanProtocol, systemDraft.networkProbe.lanHost)
+    : `${systemDraft.networkProbe.lanProtocol}://<host>${NETWORK_PROBE_PATH}`
+  const wanProbePreview = systemDraft.networkProbe.wanHost.trim()
+    ? buildNetworkProbeUrl(systemDraft.networkProbe.wanProtocol, systemDraft.networkProbe.wanHost)
+    : `${systemDraft.networkProbe.wanProtocol}://<host>${NETWORK_PROBE_PATH}`
   const canRunWebdavBackup =
     webdavVersionsEnabled &&
     !isWebdavBackupDirty &&
@@ -211,6 +226,7 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
     setCustomEngineUrl('')
     setJsonFeedback(null)
     setSystemFeedback(null)
+    setNetworkFeedback(null)
     setAccountFeedback(null)
     setSearchFeedback(null)
     setBackupFeedback(null)
@@ -505,6 +521,63 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
       message,
     })
     showToast({ type: 'success', message })
+  }
+
+  function handleNetworkProbeFieldChange<K extends keyof SystemConfig['networkProbe']>(
+    field: K,
+    value: SystemConfig['networkProbe'][K]
+  ) {
+    setSystemDraft((current) => ({
+      ...current,
+      networkProbe: {
+        ...current.networkProbe,
+        [field]: value,
+      },
+    }))
+    setNetworkFeedback(null)
+  }
+
+  function handleSaveNetworkProbeConfig() {
+    const previousConfig = activeSystemConfig
+    const nextConfig: SystemConfig = {
+      ...systemDraft,
+      networkProbe: {
+        ...systemDraft.networkProbe,
+        lanHost: systemDraft.networkProbe.lanHost.trim(),
+        wanHost: systemDraft.networkProbe.wanHost.trim(),
+      },
+    }
+
+    setSystemDraft(nextConfig)
+    setNetworkFeedback(null)
+
+    saveSystemMutation.mutate(nextConfig, {
+      onSuccess: (savedConfig) => {
+        setSystemDraft(savedConfig)
+        setBackupDraft(cloneWebdavBackupConfig(savedConfig.webdavBackup))
+        setNetworkFeedback({
+          type: 'success',
+          message: messages.settings.networkSection.saved,
+        })
+        showToast({ type: 'success', message: messages.settings.networkSection.saved })
+      },
+      onError: (error) => {
+        setSystemDraft(previousConfig)
+        setBackupDraft(cloneWebdavBackupConfig(previousConfig.webdavBackup))
+        const message =
+          error instanceof Error ? error.message : messages.settings.networkSection.saveFailed
+        setNetworkFeedback({
+          type: 'error',
+          message,
+        })
+        showToast({ type: 'error', message })
+      },
+    })
+  }
+
+  function handleNetworkProbeSettingsSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    handleSaveNetworkProbeConfig()
   }
 
   function saveSearchDraft(
@@ -811,6 +884,12 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
       icon: systemDraft.darkMode ? MoonStar : Sun,
     },
     {
+      key: 'network-probe' as const,
+      label: messages.settings.networkSection.label,
+      description: messages.settings.networkSection.description,
+      icon: Wifi,
+    },
+    {
       key: 'account' as const,
       label: messages.settings.accountSection.label,
       description: messages.settings.accountSection.description,
@@ -991,6 +1070,162 @@ export function ServiceSettingsButton({ initialOpen = false }: ServiceSettingsBu
                   </div>
                 </div>
               </div>
+            </ConfigPanelSection>
+          ) : activeSection === 'network-probe' ? (
+            <ConfigPanelSection
+              title={messages.settings.networkSection.title}
+              summary={messages.settings.networkSection.summary}
+              footer={
+                <>
+                  <div className={getFeedbackNoticeClass(networkFeedback?.type)}>
+                    {networkFeedback?.message ?? messages.settings.networkSection.footerHint}
+                  </div>
+                  <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full sm:w-auto"
+                    >
+                      {messages.common.close}
+                    </Button>
+                    <Button
+                      type="submit"
+                      form={networkProbeSettingsFormId}
+                      size="sm"
+                      disabled={saveSystemMutation.isPending}
+                      className="w-full sm:w-auto"
+                    >
+                      {messages.common.save}
+                    </Button>
+                  </div>
+                </>
+              }
+            >
+              <form
+                id={networkProbeSettingsFormId}
+                className="grid gap-3"
+                onSubmit={handleNetworkProbeSettingsSubmit}
+              >
+                <div className={sectionCardClass}>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Wifi className="h-4.5 w-4.5 text-primary" />
+                    {messages.settings.networkSection.connectionTitle}
+                  </div>
+                  <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+                    {messages.settings.networkSection.connectionHint}
+                  </p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+                      <div className="text-xs font-medium text-foreground">
+                        {messages.settings.networkSection.lanTitle}
+                      </div>
+                      <div className="mt-3 grid gap-3">
+                        <div className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                          <label className="space-y-1.5">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {messages.settings.networkSection.protocolLabel}
+                            </span>
+                            <select
+                              value={systemDraft.networkProbe.lanProtocol}
+                              onChange={(event) =>
+                                handleNetworkProbeFieldChange(
+                                  'lanProtocol',
+                                  event.target.value as SystemConfig['networkProbe']['lanProtocol']
+                                )
+                              }
+                              className="config-panel-select"
+                            >
+                              <option value="http">http</option>
+                              <option value="https">https</option>
+                            </select>
+                          </label>
+                          <label className="space-y-1.5">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {messages.settings.networkSection.hostLabel}
+                            </span>
+                            <Input
+                              value={systemDraft.networkProbe.lanHost}
+                              onChange={(event) =>
+                                handleNetworkProbeFieldChange('lanHost', event.target.value)
+                              }
+                              placeholder={messages.settings.networkSection.lanPlaceholder}
+                              className="h-10"
+                            />
+                          </label>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="text-xs font-medium text-muted-foreground">
+                            {messages.settings.networkSection.previewLabel}
+                          </div>
+                          <div className="rounded-lg border border-border/70 bg-muted/35 px-3 py-2 font-mono text-[11px] leading-5 text-foreground/80">
+                            {lanProbePreview}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+                      <div className="text-xs font-medium text-foreground">
+                        {messages.settings.networkSection.wanTitle}
+                      </div>
+                      <div className="mt-3 grid gap-3">
+                        <div className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                          <label className="space-y-1.5">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {messages.settings.networkSection.protocolLabel}
+                            </span>
+                            <select
+                              value={systemDraft.networkProbe.wanProtocol}
+                              onChange={(event) =>
+                                handleNetworkProbeFieldChange(
+                                  'wanProtocol',
+                                  event.target.value as SystemConfig['networkProbe']['wanProtocol']
+                                )
+                              }
+                              className="config-panel-select"
+                            >
+                              <option value="http">http</option>
+                              <option value="https">https</option>
+                            </select>
+                          </label>
+                          <label className="space-y-1.5">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {messages.settings.networkSection.hostLabel}
+                            </span>
+                            <Input
+                              value={systemDraft.networkProbe.wanHost}
+                              onChange={(event) =>
+                                handleNetworkProbeFieldChange('wanHost', event.target.value)
+                              }
+                              placeholder={messages.settings.networkSection.wanPlaceholder}
+                              className="h-10"
+                            />
+                          </label>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="text-xs font-medium text-muted-foreground">
+                            {messages.settings.networkSection.previewLabel}
+                          </div>
+                          <div className="rounded-lg border border-border/70 bg-muted/35 px-3 py-2 font-mono text-[11px] leading-5 text-foreground/80">
+                            {wanProbePreview}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 rounded-xl border border-border/70 bg-background/82 px-3 py-3 text-xs leading-5 text-muted-foreground dark:bg-stone-900/72">
+                    <p>{messages.settings.networkSection.suffixHint(NETWORK_PROBE_PATH)}</p>
+                    <p className="mt-1">{messages.settings.networkSection.fallbackHint}</p>
+                    <p className="mt-1 font-medium text-foreground/85">
+                      {hasConfiguredNetworkProbe
+                        ? messages.settings.networkSection.priorityReady
+                        : messages.settings.networkSection.priorityFallback}
+                    </p>
+                  </div>
+                </div>
+              </form>
             </ConfigPanelSection>
           ) : activeSection === 'account' ? (
             <ConfigPanelSection

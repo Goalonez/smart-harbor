@@ -79,7 +79,12 @@ export function BookmarkEditDialog({
       const nextDraft = { ...current, [field]: value } as BookmarkFormValues
 
       if (field === 'name' && !slugTouched && activeService) {
-        nextDraft.slug = buildSuggestedSlug(String(value), activeConfig, activeService.slug)
+        nextDraft.slug = buildSuggestedSlug(
+          String(value),
+          activeConfig,
+          activeService.slug,
+          current.slug
+        )
       }
 
       return nextDraft
