@@ -1,4 +1,4 @@
-name: Build Extension Release
+name: Publish GitHub Release
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  build-extension:
+  publish-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,22 +20,47 @@ jobs:
         run: bash .github/scripts/parse-release-tag.sh
 
       - name: Set up Node.js
-        if: steps.release.outputs.publish_extension == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
-        if: steps.release.outputs.publish_extension == 'true'
-        run: npm ci
-
       - name: Validate package version
-        if: steps.release.outputs.publish_extension == 'true'
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
           node -e "const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('package.json','utf8')); if (pkg.version !== process.env.RELEASE_VERSION) { console.error('package.json version ' + pkg.version + ' does not match release version ' + process.env.RELEASE_VERSION); process.exit(1); }"
+
+      - name: Validate release notes
+        run: |
+          test -f "release-notes/${{ steps.release.outputs.tag }}.md"
+
+      - name: Prepare release body
+        id: release_body
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          PUBLISH_EXTENSION: ${{ steps.release.outputs.publish_extension }}
+        run: |
+          body_path="$(mktemp)"
+          cp "release-notes/${RELEASE_TAG}.md" "${body_path}"
+
+          if [[ "${PUBLISH_EXTENSION}" != "true" ]]; then
+            cat <<'EOF' >> "${body_path}"
+
+            ---
+
+            **插件下载 / Extension Download**
+
+            - 本次版本不包含插件更新；如需安装浏览器插件，请前往 GitHub Releases 下载最近一个附带 `smart-harbor-new-tab-*.zip` 资产的版本。
+            - This release does not include extension updates. To install the browser extension, download the most recent release on GitHub Releases that includes a `smart-harbor-new-tab-*.zip` asset.
+            EOF
+          fi
+
+          echo "body_path=${body_path}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install dependencies
+        if: steps.release.outputs.publish_extension == 'true'
+        run: npm ci
 
       - name: Build extension
         if: steps.release.outputs.publish_extension == 'true'
@@ -50,14 +75,16 @@ jobs:
           EXTENSION_ARTIFACT_TAG: ${{ steps.release.outputs.tag }}
         run: npm run package:extension
 
-      - name: Validate release notes
-        if: steps.release.outputs.publish_extension == 'true'
-        run: |
-          test -f "release-notes/${{ steps.release.outputs.tag }}.md"
-
-      - name: Publish GitHub release asset
+      - name: Publish GitHub release with extension asset
         if: steps.release.outputs.publish_extension == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          body_path: release-notes/${{ steps.release.outputs.tag }}.md
+          body_path: ${{ steps.release_body.outputs.body_path }}
           files: extension/smart-harbor-new-tab-${{ steps.release.outputs.tag }}.zip
+          fail_on_unmatched_files: true
+
+      - name: Publish GitHub release notes
+        if: steps.release.outputs.publish_extension != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ steps.release_body.outputs.body_path }}
