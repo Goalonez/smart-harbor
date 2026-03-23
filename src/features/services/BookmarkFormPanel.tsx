@@ -37,7 +37,6 @@ export function BookmarkForm({
 }: BookmarkFormProps) {
   const { messages } = useI18n()
   const fieldCardClass = 'config-panel-card-muted space-y-1.5 p-3'
-  const compactFieldCardClass = 'config-panel-card-muted space-y-1 p-2.5'
   const fieldLabelClass =
     'text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/90'
 
@@ -148,43 +147,26 @@ export function BookmarkForm({
             </p>
           </label>
 
-          <div className="grid gap-3 md:col-span-2 md:grid-cols-[minmax(0,1.45fr)_minmax(15rem,1fr)]">
-            <label className={compactFieldCardClass}>
-              <span className={`block ${fieldLabelClass}`}>{messages.bookmarkForm.probes}</span>
-              <textarea
-                value={values.probesText}
-                onChange={(event) => onFieldChange('probesText', event.target.value)}
-                spellCheck={false}
-                rows={2}
-                className="bookmark-form-probes config-panel-textarea min-h-[5.25rem] resize-y"
-                placeholder={messages.common.probePlaceholder}
-              />
-              <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
-                {messages.bookmarkForm.probesHint}
-              </p>
-            </label>
-
-            <div className="min-w-0">
-              <div className="config-panel-card flex h-full flex-col justify-between gap-2.5 p-2.5">
-                <div>
-                  <div className="text-[12px] font-medium text-foreground sm:text-[13px]">
-                    {messages.bookmarkForm.forceNewTab}
-                  </div>
-                  <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
-                    {messages.bookmarkForm.forceNewTabHint}
-                  </p>
+          <div className="min-w-0 md:col-span-2">
+            <div className="config-panel-card flex flex-col justify-between gap-2.5 p-2.5 sm:flex-row sm:items-center">
+              <div>
+                <div className="text-[12px] font-medium text-foreground sm:text-[13px]">
+                  {messages.bookmarkForm.forceNewTab}
                 </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={values.forceNewTab}
-                  onClick={() => onFieldChange('forceNewTab', !values.forceNewTab)}
-                  data-checked={values.forceNewTab}
-                  className="config-switch self-start"
-                >
-                  <span className="config-switch-thumb" />
-                </button>
+                <p className="mt-0.5 text-[11px] leading-[1.2rem] text-muted-foreground sm:text-xs sm:leading-5">
+                  {messages.bookmarkForm.forceNewTabHint}
+                </p>
               </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={values.forceNewTab}
+                onClick={() => onFieldChange('forceNewTab', !values.forceNewTab)}
+                data-checked={values.forceNewTab}
+                className="config-switch self-start sm:self-center"
+              >
+                <span className="config-switch-thumb" />
+              </button>
             </div>
           </div>
         </div>

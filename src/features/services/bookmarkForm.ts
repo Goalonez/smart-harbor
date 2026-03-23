@@ -15,7 +15,6 @@ export interface BookmarkFormValues {
   icon: string
   primaryUrl: string
   secondaryUrl: string
-  probesText: string
   forceNewTab: boolean
 }
 
@@ -23,9 +22,17 @@ interface ValidateBookmarkFormOptions {
   currentSlug?: string
 }
 
+function getNextBookmarkIndex(config: ServicesConfig) {
+  return config.reduce((count, group) => count + group.items.length, 0) + 1
+}
+
+function buildDefaultBookmarkSlugFallback(config: ServicesConfig) {
+  return `service-${getNextBookmarkIndex(config)}`
+}
+
 export function createEmptyBookmarkForm(config: ServicesConfig): BookmarkFormValues {
   const messages = getCurrentMessages()
-  const nextIndex = config.reduce((count, group) => count + group.items.length, 0) + 1
+  const nextIndex = getNextBookmarkIndex(config)
   const name = messages.common.newBookmarkName(nextIndex)
 
   return {
@@ -36,7 +43,6 @@ export function createEmptyBookmarkForm(config: ServicesConfig): BookmarkFormVal
     icon: '',
     primaryUrl: 'http://127.0.0.1',
     secondaryUrl: '',
-    probesText: '',
     forceNewTab: false,
   }
 }
@@ -53,7 +59,6 @@ export function createBookmarkFormFromService(
     icon: service.icon ?? '',
     primaryUrl: service.primaryUrl,
     secondaryUrl: service.secondaryUrl ?? '',
-    probesText: formatProbesInput(service.probes),
     forceNewTab: service.forceNewTab ?? false,
   }
 }
@@ -62,23 +67,12 @@ export function buildSuggestedSlug(
   name: string,
   config: ServicesConfig,
   currentSlug?: string,
-  fallback = 'service'
+  fallback?: string
 ) {
-  const base = name.trim() || fallback
-  return buildUniqueSlug(base, config, currentSlug)
-}
+  const nextFallback =
+    fallback?.trim() || currentSlug || buildDefaultBookmarkSlugFallback(config)
 
-export function parseProbesInput(value: string) {
-  const probes = value
-    .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean)
-
-  return probes.length > 0 ? probes : undefined
-}
-
-export function formatProbesInput(probes?: string[]) {
-  return probes?.join('\n') ?? ''
+  return buildUniqueSlug(name, config, currentSlug, nextFallback)
 }
 
 export function validateBookmarkForm(
@@ -96,7 +90,6 @@ export function validateBookmarkForm(
     icon: values.icon.trim() || undefined,
     primaryUrl: values.primaryUrl.trim(),
     secondaryUrl: values.secondaryUrl.trim(),
-    probes: parseProbesInput(values.probesText),
     forceNewTab: values.forceNewTab,
   })
 
@@ -155,10 +148,6 @@ export function formatBookmarkError(error: unknown) {
 
     if (field === 'secondaryUrl') {
       return messages.errors.secondaryUrlInvalid
-    }
-
-    if (field === 'probes') {
-      return messages.errors.probesInvalid
     }
 
     return firstIssue?.message ?? messages.errors.validationFailed

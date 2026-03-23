@@ -44,6 +44,12 @@ export function cloneAppConfig(config: AppConfig): AppConfig {
   return {
     system: {
       ...config.system,
+      networkProbe: {
+        ...config.system.networkProbe,
+      },
+      webdavBackup: {
+        ...config.system.webdavBackup,
+      },
       customSearchEngines: config.system.customSearchEngines.map((engine) => ({ ...engine })),
     },
     services: cloneServicesConfig(config.services),

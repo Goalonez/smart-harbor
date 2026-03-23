@@ -41,7 +41,6 @@ const zhCN = {
     bookmarkNameExample: '例如：家庭相册',
     bookmarkSlugExample: '例如：immich',
     searchEngineNameExample: '如 Perplexity',
-    probePlaceholder: '每行一个探测 URL，可留空',
     newBookmarkName: (index: number) => `新书签 ${index}`,
   },
   languageToggle: {
@@ -61,19 +60,21 @@ const zhCN = {
     networkInfo: {
       buttonAria: '查看网络模式说明',
       title: '网络模式说明',
-      summary: '系统默认只会在首页加载时检测一次当前网络环境，不会在每次打开书签时单独探测。',
+      summary:
+        '系统会在首页加载时检测一次当前网络环境。若已完整配置探测设置，则优先检查内外网健康地址；否则回退到第一个书签的探测逻辑。',
       currentMode: '当前模式',
       currentStrategy: '当前策略',
       strategyLabel: '网络切换',
       strategyAuto: '自动检测',
       strategyManual: '手动切换',
-      autoHint: '直接选择要使用的网络模式。选“自动检测”时，首页加载会尝试判断当前是在局域网还是外网。',
+      autoHint:
+        '选“自动检测”时，系统会先尝试探测设置里的内网健康地址，再尝试外网健康地址；若未完整配置，则回退到第一个书签。',
       manualHint: '适用于 iOS 等无法从 HTTPS 页面探测 HTTP 地址的场景，切换后会立即影响所有书签的打开地址。',
       manualModeLabel: '手动网络',
       manualModeHint: '请选择当前应该优先使用的地址类型。',
       lanRule: '检测为局域网时，所有书签统一使用主地址。',
       wanRule: '检测为外网时，优先使用切换地址；如果切换地址为空，则继续使用主地址。',
-      unknownRule: '未检测完成前，会先按主地址处理。',
+      unknownRule: '探测未完成或健康地址都不可达时，会先按主地址处理。',
     },
   },
   home: {
@@ -187,8 +188,6 @@ const zhCN = {
     primaryUrlHint: '优先打开这个地址，通常填写内网地址；如果只有一个地址，填这里即可。',
     secondaryUrl: '切换地址',
     secondaryUrlHint: '可选，通常填写外网地址；留空时会继续使用主地址。',
-    probes: '探测地址',
-    probesHint: '用于判断当前网络环境；每行填写一个地址，不需要时可以留空。',
     forceNewTab: '强制新标签页打开',
     forceNewTabHint: '适用于不支持内嵌框架的页面；开启后，这个书签会始终在新标签页中打开。',
     footerHint: '保存后会直接写入配置，并立即同步到首页。',
@@ -254,6 +253,28 @@ const zhCN = {
       turnedOn: '已开启夜间模式。',
       turnedOff: '已关闭夜间模式。',
       saveFailed: '系统设置保存失败，请稍后再试。',
+    },
+    networkSection: {
+      label: '探测设置',
+      description: '内外网健康检查地址',
+      title: '探测设置',
+      summary: '优先使用这里配置的内外网健康地址判断网络模式；未完整配置时，会回退到第一个书签的探测逻辑。',
+      connectionTitle: '健康检查地址',
+      connectionHint: '这里只填写协议和主机/IP，系统会自动拼接固定的健康检查路径。',
+      lanTitle: '内网健康地址',
+      wanTitle: '外网健康地址',
+      protocolLabel: '协议',
+      hostLabel: '主机或 IP',
+      lanPlaceholder: '例如：192.168.6.138:3001',
+      wanPlaceholder: '例如：nav.example.com',
+      previewLabel: '最终地址',
+      suffixHint: (path: string) => `固定路径为 ${path}，无需手动填写。`,
+      fallbackHint: '内外网地址需同时填写后才会优先用于自动检测；否则会回退到第一个书签的探测逻辑。',
+      priorityReady: '当前状态：已完整配置，自动检测会优先使用这里的健康地址。',
+      priorityFallback: '当前状态：配置未完成，自动检测仍会回退到第一个书签。',
+      footerHint: '保存后会在下次自动检测时生效。',
+      saved: '探测设置已保存。',
+      saveFailed: '探测设置保存失败，请稍后再试。',
     },
     accountSection: {
       label: '账号管理',
@@ -431,7 +452,6 @@ const en: typeof zhCN = {
     bookmarkNameExample: 'e.g. Photo Library',
     bookmarkSlugExample: 'e.g. immich',
     searchEngineNameExample: 'e.g. Perplexity',
-    probePlaceholder: 'One probe URL per line, optional',
     newBookmarkName: (index: number) => `New Bookmark ${index}`,
   },
   languageToggle: {
@@ -452,14 +472,14 @@ const en: typeof zhCN = {
       buttonAria: 'View network mode details',
       title: 'Network mode details',
       summary:
-        'By default, the app checks the current network environment once when the homepage loads and does not probe each bookmark when opening it.',
+        'The app checks the current network environment once when the homepage loads. If probe settings are fully configured, it checks the LAN and WAN health addresses first; otherwise it falls back to the first bookmark probe.',
       currentMode: 'Current mode',
       currentStrategy: 'Current strategy',
       strategyLabel: 'Network switching',
       strategyAuto: 'Auto detect',
       strategyManual: 'Manual switch',
       autoHint:
-        'Choose the network mode directly here. When Auto detect is selected, the homepage will try to determine whether you are on LAN or WAN as it loads.',
+        'When Auto detect is selected, the app checks the configured LAN health address first, then the WAN health address. If the probe settings are incomplete, it falls back to the first bookmark.',
       manualHint:
         'Useful on iOS and similar environments where an HTTPS page cannot probe HTTP addresses. Switching takes effect for all bookmarks immediately.',
       manualModeLabel: 'Manual network',
@@ -467,7 +487,8 @@ const en: typeof zhCN = {
       lanRule: 'When LAN is detected, all bookmarks use the primary URL.',
       wanRule:
         'When WAN is detected, the switched URL is preferred; if it is empty, the primary URL is used.',
-      unknownRule: 'Before detection finishes, the primary URL is used by default.',
+      unknownRule:
+        'If detection is unfinished or both health addresses are unreachable, the primary URL is used by default.',
     },
   },
   home: {
@@ -591,9 +612,6 @@ const en: typeof zhCN = {
       'This URL opens first. Usually it should be the LAN URL; if you only have one URL, put it here.',
     secondaryUrl: 'Secondary URL',
     secondaryUrlHint: 'Optional. Usually this is the WAN URL; if empty, the primary URL is reused.',
-    probes: 'Probe URLs',
-    probesHint:
-      'Used to detect the current network environment. Enter one URL per line, or leave it empty.',
     forceNewTab: 'Force open in new tab',
     forceNewTabHint:
       'Useful for pages that do not work well inside embedded frames. When enabled, this bookmark always opens in a new tab.',
@@ -662,6 +680,33 @@ const en: typeof zhCN = {
       turnedOn: 'Dark mode enabled.',
       turnedOff: 'Dark mode disabled.',
       saveFailed: 'Failed to save system settings. Please try again later.',
+    },
+    networkSection: {
+      label: 'Probe Settings',
+      description: 'LAN and WAN health check addresses',
+      title: 'Probe Settings',
+      summary:
+        'Prefer the configured LAN and WAN health addresses to determine the network mode. If the setup is incomplete, the app falls back to the first bookmark probe.',
+      connectionTitle: 'Health Check Addresses',
+      connectionHint:
+        'Only enter the protocol and host/IP here. The app appends the fixed health check path automatically.',
+      lanTitle: 'LAN Health Address',
+      wanTitle: 'WAN Health Address',
+      protocolLabel: 'Protocol',
+      hostLabel: 'Host or IP',
+      lanPlaceholder: 'e.g. 192.168.6.138:3001',
+      wanPlaceholder: 'e.g. nav.example.com',
+      previewLabel: 'Resolved URL',
+      suffixHint: (path: string) => `The fixed path ${path} is appended automatically.`,
+      fallbackHint:
+        'Both LAN and WAN addresses must be filled in before automatic detection will prefer them; otherwise it falls back to the first bookmark probe.',
+      priorityReady:
+        'Current state: fully configured. Auto detection will prefer these health check addresses.',
+      priorityFallback:
+        'Current state: incomplete. Auto detection still falls back to the first bookmark.',
+      footerHint: 'Changes take effect on the next automatic detection.',
+      saved: 'Probe settings saved.',
+      saveFailed: 'Failed to save probe settings. Please try again later.',
     },
     accountSection: {
       label: 'Account',

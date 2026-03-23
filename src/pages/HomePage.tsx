@@ -5,6 +5,7 @@ import { TopBar } from '@/components/TopBar'
 import { ServiceGrid } from '@/features/services/ServiceGrid'
 import { useI18n } from '@/i18n/runtime'
 import { useAppStore } from '@/store/appStore'
+import { useSystemConfig } from '@/features/config/useSystemConfig'
 import { useServices } from '@/features/services/useServices'
 import { detectNetworkMode } from '@/core/network/detectNetworkMode'
 
@@ -13,6 +14,7 @@ export function HomePage() {
   const setDetectedNetworkMode = useAppStore((state) => state.setDetectedNetworkMode)
   const error = useAppStore((state) => state.error)
   const { allServices } = useServices()
+  const { data: systemConfig } = useSystemConfig()
   const { messages } = useI18n()
 
   useEffect(() => {
@@ -24,14 +26,7 @@ export function HomePage() {
       }
     }
 
-    if (allServices.length === 0) {
-      setDetectedNetworkMode('unknown')
-      return () => {
-        cancelled = true
-      }
-    }
-
-    void detectNetworkMode(allServices).then((mode) => {
+    void detectNetworkMode(allServices, systemConfig?.networkProbe).then((mode) => {
       if (!cancelled) {
         setDetectedNetworkMode(mode)
       }
@@ -40,7 +35,7 @@ export function HomePage() {
     return () => {
       cancelled = true
     }
-  }, [allServices, networkModeStrategy, setDetectedNetworkMode])
+  }, [allServices, networkModeStrategy, setDetectedNetworkMode, systemConfig?.networkProbe])
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background">

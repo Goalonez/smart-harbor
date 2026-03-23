@@ -4,6 +4,10 @@ import {
   builtinSearchEngineIds,
   isValidSearchEngineTemplate,
 } from './searchEngines.js'
+import {
+  isValidNetworkProbeHost,
+  networkProbeProtocols,
+} from './networkProbe.js'
 
 const trimmedString = z.string().trim().min(1)
 const optionalUrl = z.string().trim().url().optional()
@@ -29,6 +33,8 @@ export const authConfigSchema = z.object({
   username: authUsernameSchema,
   passwordHash: authPasswordHashSchema,
 })
+
+export const networkProbeProtocolSchema = z.enum(networkProbeProtocols)
 
 const canonicalServiceConfigSchema = z.object({
   slug: slugSchema,
@@ -151,6 +157,32 @@ export const webdavBackupConfigSchema = z
     }
   })
 
+export const networkProbeConfigSchema = z
+  .object({
+    lanProtocol: networkProbeProtocolSchema.default('http'),
+    lanHost: z.string().trim().default(''),
+    wanProtocol: networkProbeProtocolSchema.default('https'),
+    wanHost: z.string().trim().default(''),
+  })
+  .superRefine((config, ctx) => {
+    if (config.lanHost && !isValidNetworkProbeHost(config.lanHost)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['lanHost'],
+        message: '请输入合法的内网主机或 IP，可选端口，但不要包含协议或路径',
+      })
+    }
+
+    if (config.wanHost && !isValidNetworkProbeHost(config.wanHost)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['wanHost'],
+        message: '请输入合法的外网主机或域名，可选端口，但不要包含协议或路径',
+      })
+    }
+  })
+  .default({})
+
 export const systemConfigSchema = z
   .object({
     appName: trimmedString.default('Smart Harbor'),
@@ -159,6 +191,7 @@ export const systemConfigSchema = z
     middleClickOpenTarget: openTargetSchema.default('blank'),
     defaultSearchEngine: slugSchema.default('google'),
     customSearchEngines: z.array(customSearchEngineSchema).default([]),
+    networkProbe: networkProbeConfigSchema.default({}),
     webdavBackup: webdavBackupConfigSchema.default({}),
     auth: authConfigSchema.optional(),
   })
@@ -213,6 +246,7 @@ export type ServicesConfig = z.infer<typeof servicesConfigSchema>
 export type Service = z.infer<typeof serviceSchema>
 export type Services = z.infer<typeof servicesSchema>
 export type AuthConfig = z.infer<typeof authConfigSchema>
+export type NetworkProbeConfig = z.infer<typeof networkProbeConfigSchema>
 export type WebdavBackupConfig = z.infer<typeof webdavBackupConfigSchema>
 export type SystemConfig = z.infer<typeof systemConfigSchema>
 export type AppConfig = z.infer<typeof appConfigSchema>
