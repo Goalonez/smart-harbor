@@ -7,6 +7,12 @@ const distDir = path.resolve(extensionDir, 'dist')
 
 const packageJson = JSON.parse(await fs.readFile(path.resolve(rootDir, 'package.json'), 'utf8'))
 const version = process.env.EXTENSION_VERSION || packageJson.version
+const extensionIcons = {
+  16: 'icons/icon-16.png',
+  32: 'icons/icon-32.png',
+  48: 'icons/icon-48.png',
+  128: 'icons/icon-128.png',
+}
 
 const manifest = {
   manifest_version: 3,
@@ -15,12 +21,14 @@ const manifest = {
   description: 'Use Smart Harbor as the Chrome new tab page with automatic primary/secondary URL switching.',
   permissions: ['storage', 'permissions'],
   optional_host_permissions: ['http://*/*', 'https://*/*'],
+  icons: extensionIcons,
   background: {
     service_worker: 'background.js',
     type: 'module',
   },
   action: {
     default_title: 'Smart Harbor Settings',
+    default_icon: extensionIcons,
   },
   options_ui: {
     page: 'options.html',
