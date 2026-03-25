@@ -3,6 +3,18 @@
 本文件用于在 `main` 分支记录每个正式版本的简洁更新说明。
 Each release on `main` should add a short bilingual summary here.
 
+## v1.2.4 - 2026-03-25
+
+### 中文
+- 统一网站标签页图标，改为新的品牌 logo。
+- 插件补齐扩展图标集，并同步更新新标签页与设置页的页面图标。
+- 插件：新增多尺寸品牌图标资源，确保浏览器扩展清单和打包产物使用一致图标。
+
+### English
+- Updated the web tab favicon to use the new brand logo.
+- Added a full extension icon set and synced the new logo to the new tab and options page favicons.
+- Extension: added multi-size brand icon assets so the manifest and packaged extension use the same branding consistently.
+
 ## v1.2.3-web - 2026-03-23
 
 ### 中文
