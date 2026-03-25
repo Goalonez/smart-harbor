@@ -3,6 +3,18 @@
 本文件用于在 `main` 分支记录每个正式版本的简洁更新说明。
 Each release on `main` should add a short bilingual summary here.
 
+## v1.2.5 - 2026-03-25
+
+### 中文
+- 修复 GitHub Release 发版流程，恢复正式版本时的发布说明生成步骤。
+- 插件：恢复扩展打包与 GitHub Releases 附件发布链路，后续正式版会重新附带浏览器插件压缩包。
+- 统一 GitHub Actions 的 Node.js 版本到 `24.14.0`，与本地开发环境保持一致。
+
+### English
+- Fixed the GitHub Release workflow so release notes are generated reliably during official releases.
+- Extension: restored extension packaging and GitHub Releases asset publishing so future releases include the browser extension zip again.
+- Unified the GitHub Actions Node.js version to `24.14.0` to match the local development environment.
+
 ## v1.2.4 - 2026-03-25
 
 ### 中文

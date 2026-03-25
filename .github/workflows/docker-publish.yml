@@ -7,6 +7,7 @@ on:
 
 env:
   IMAGE_NAME: goalonez/smart-harbor
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build-and-push:
@@ -17,11 +18,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Parse release tag
         id: release
         run: bash .github/scripts/parse-release-tag.sh
+
+      - name: Set up Node.js
+        if: steps.release.outputs.publish_web == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.14.0
+          cache: npm
 
       - name: Validate package version
         if: steps.release.outputs.publish_web == 'true'
