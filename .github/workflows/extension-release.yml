@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   publish-release:
     runs-on: ubuntu-latest
@@ -13,16 +16,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Parse release tag
         id: release
         run: bash .github/scripts/parse-release-tag.sh
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24.14.0
           cache: npm
 
       - name: Validate package version
@@ -37,6 +40,7 @@ jobs:
 
       - name: Prepare release body
         id: release_body
+        shell: bash
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
           PUBLISH_EXTENSION: ${{ steps.release.outputs.publish_extension }}
@@ -44,19 +48,16 @@ jobs:
           body_path="$(mktemp)"
           cp "release-notes/${RELEASE_TAG}.md" "${body_path}"
 
-          if [[ "${PUBLISH_EXTENSION}" != "true" ]]; then
-            cat <<'EOF' >> "${body_path}"
-
-            ---
-
-            **插件下载 / Extension Download**
-
-            - 本次版本不包含插件更新；如需安装浏览器插件，请前往 GitHub Releases 下载最近一个附带 `smart-harbor-new-tab-*.zip` 资产的版本。
-            - This release does not include extension updates. To install the browser extension, download the most recent release on GitHub Releases that includes a `smart-harbor-new-tab-*.zip` asset.
-            EOF
+          if [ "${PUBLISH_EXTENSION}" != "true" ]; then
+            {
+              printf '\n---\n\n'
+              printf '%s\n\n' '**插件下载 / Extension Download**'
+              printf '%s\n' '- 本次版本不包含插件更新；如需安装浏览器插件，请前往 GitHub Releases 下载最近一个附带 `smart-harbor-new-tab-*.zip` 资产的版本。'
+              printf '%s\n' '- This release does not include extension updates. To install the browser extension, download the most recent release on GitHub Releases that includes a `smart-harbor-new-tab-*.zip` asset.'
+            } >> "${body_path}"
           fi
 
-          echo "body_path=${body_path}" >> "${GITHUB_OUTPUT}"
+          printf 'body_path=%s\n' "${body_path}" >> "${GITHUB_OUTPUT}"
 
       - name: Install dependencies
         if: steps.release.outputs.publish_extension == 'true'
