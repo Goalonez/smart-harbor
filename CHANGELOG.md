@@ -3,6 +3,14 @@
 本文件用于在 `main` 分支记录每个正式版本的简洁更新说明。
 Each release on `main` should add a short bilingual summary here.
 
+## v1.2.6-web - 2026-03-30
+
+### 中文
+- 优化首页时钟布局，将年月日和星期移到时间右侧，并让整组内容保持水平居中。
+
+### English
+- Refined the home page clock layout by moving the date and weekday to the right of the time and centering them as one horizontal group.
+
 ## v1.2.5 - 2026-03-25
 
 ### 中文
