@@ -29,3 +29,14 @@ extension/*.zip
 /scripts/release.mjs
 AGENTS.md
 CLAUDE.md
+
+.idea/
+.vscode/
+AGENTS.md
+CLAUDE.md
+.claude/
+.codex/
+.opencode/
+.agents/
+.trellis/
+.history/
