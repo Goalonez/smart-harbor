@@ -40,3 +40,4 @@ CLAUDE.md
 .agents/
 .trellis/
 .history/
+.playwright-cli/
