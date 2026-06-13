@@ -205,7 +205,7 @@ docker run -d \
 2. 打开 `chrome://extensions`。
 3. 开启开发者模式。
 4. 点击“加载已解压的扩展程序”。
-5. 选择 `extension/smart-harbor-new-tab-v<version>`。
+5. 选择 `extension/smart-harbor-v<version>`。
 
 ### 本地构建
 
@@ -216,8 +216,8 @@ npm run package:extension
 
 生成结果：
 
-- 目录：`extension/smart-harbor-new-tab-v<version>`
-- 压缩包：`extension/smart-harbor-new-tab-v<version>.zip`
+- 目录：`extension/smart-harbor-v<version>`
+- 压缩包：`extension/smart-harbor-v<version>.zip`
 
 ## 已知问题
 

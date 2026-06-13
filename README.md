@@ -205,7 +205,7 @@ Use the bundled extension when you want every Chrome new tab to open Smart Harbo
 2. Open `chrome://extensions`.
 3. Enable Developer mode.
 4. Click `Load unpacked`.
-5. Select `extension/smart-harbor-new-tab-v<version>`.
+5. Select `extension/smart-harbor-v<version>`.
 
 ### Build Locally
 
@@ -216,8 +216,8 @@ npm run package:extension
 
 Generated output:
 
-- Folder: `extension/smart-harbor-new-tab-v<version>`
-- Zip: `extension/smart-harbor-new-tab-v<version>.zip`
+- Folder: `extension/smart-harbor-v<version>`
+- Zip: `extension/smart-harbor-v<version>.zip`
 
 ## Known Issues
 

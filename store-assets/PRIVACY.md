@@ -1,10 +1,10 @@
-# Privacy Policy — Smart Harbor New Tab
+# Privacy Policy — Smart Harbor
 
 _Last updated: 2026-06-13_
 
 ## English
 
-Smart Harbor New Tab is a Chrome extension that replaces the new tab page with a
+Smart Harbor is a Chrome extension that replaces the new tab page with a
 personal homepage and automatically switches between a user-configured primary
 and fallback URL based on reachability.
 
@@ -51,7 +51,7 @@ For questions about this policy, please open an issue at
 
 ## 中文
 
-Smart Harbor New Tab 是一款 Chrome 扩展,将新标签页替换为个人主页,并根据可达性在
+Smart Harbor 是一款 Chrome 扩展,将新标签页替换为个人主页,并根据可达性在
 用户配置的主地址与备用地址之间自动切换。
 
 ### 我们收集的数据
