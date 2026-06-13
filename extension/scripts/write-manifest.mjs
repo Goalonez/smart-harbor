@@ -16,7 +16,7 @@ const extensionIcons = {
 
 const manifest = {
   manifest_version: 3,
-  name: 'Smart Harbor New Tab',
+  name: 'Smart Harbor',
   version,
   description: 'Use Smart Harbor as the Chrome new tab page with automatic primary/secondary URL switching.',
   permissions: ['storage', 'permissions'],
