@@ -191,7 +191,7 @@ On first start, Smart Harbor writes a single `config.json` into your mounted con
 
 ## Chrome New Tab Extension
 
-Use the bundled extension when you want every Chrome new tab to open Smart Harbor.
+Install the Chrome extension when you want every new tab to open Smart Harbor automatically.
 
 - `primaryUrl`: primary URL, usually your LAN URL
 - `fallbackUrl`: secondary URL, usually your WAN URL
@@ -201,13 +201,11 @@ Use the bundled extension when you want every Chrome new tab to open Smart Harbo
 
 ### Install
 
-1. Download the package from GitHub Releases, or build it locally.
-2. Open `chrome://extensions`.
-3. Enable Developer mode.
-4. Click `Load unpacked`.
-5. Select `extension/smart-harbor-v<version>`.
+Install Smart Harbor from the [Chrome Web Store](https://chromewebstore.google.com/detail/smart-harbor/jbghdmdpfmnkincfamcbolbcnlogedad), then click the extension icon to set your Smart Harbor URLs.
 
 ### Build Locally
+
+For development or private testing, you can still build the extension locally:
 
 ```bash
 npm run build:extension
