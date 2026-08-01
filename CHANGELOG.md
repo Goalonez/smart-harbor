@@ -3,6 +3,16 @@
 本文件用于在 `main` 分支记录每个正式版本的简洁更新说明。
 Each release on `main` should add a short bilingual summary here.
 
+## v1.2.7-web - 2026-08-01
+
+### 中文
+- 首页书签网格现在会根据实际内容宽度在 6、8、9 列之间自适应，更充分地利用宽屏空间。
+- 优化多书签分组的换行方式，减少不必要的纵向滚动，同时保持平板和移动端布局稳定。
+
+### English
+- The homepage bookmark grid now adapts between 6, 8, and 9 columns based on the actual content width for better wide-screen usage.
+- Improved wrapping for large bookmark groups to reduce unnecessary vertical scrolling while preserving tablet and mobile layouts.
+
 ## v1.2.6-web - 2026-03-30
 
 ### 中文

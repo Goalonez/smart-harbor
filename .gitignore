@@ -24,7 +24,7 @@ dist-ssr
 dist-server
 /config
 extension/dist
-extension/smart-harbor-new-tab-v*
+extension/smart-harbor-v*
 extension/*.zip
 /scripts/release.mjs
 AGENTS.md
@@ -40,3 +40,4 @@ CLAUDE.md
 .agents/
 .trellis/
 .history/
+.playwright-cli/

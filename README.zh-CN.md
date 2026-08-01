@@ -191,7 +191,7 @@ docker run -d \
 
 ## Chrome 新标签页插件
 
-如果你希望每次打开 Chrome 新标签页都直接进入 Smart Harbor，可以使用仓库内置插件。
+如果你希望每次打开 Chrome 新标签页都直接进入 Smart Harbor，可以直接安装 Chrome 插件。
 
 - `primaryUrl`：主地址，通常填写局域网地址
 - `fallbackUrl`：切换地址，通常填写外网地址
@@ -201,13 +201,11 @@ docker run -d \
 
 ### 安装方式
 
-1. 从 GitHub Releases 下载插件包，或在本地自行构建。
-2. 打开 `chrome://extensions`。
-3. 开启开发者模式。
-4. 点击“加载已解压的扩展程序”。
-5. 选择 `extension/smart-harbor-new-tab-v<version>`。
+从 [Chrome 网上应用店](https://chromewebstore.google.com/detail/smart-harbor/jbghdmdpfmnkincfamcbolbcnlogedad) 安装 Smart Harbor，然后点击浏览器工具栏中的插件图标，填写你的 Smart Harbor 访问地址。
 
 ### 本地构建
+
+如果需要开发调试或私有测试，也可以在本地构建插件：
 
 ```bash
 npm run build:extension
@@ -216,8 +214,8 @@ npm run package:extension
 
 生成结果：
 
-- 目录：`extension/smart-harbor-new-tab-v<version>`
-- 压缩包：`extension/smart-harbor-new-tab-v<version>.zip`
+- 目录：`extension/smart-harbor-v<version>`
+- 压缩包：`extension/smart-harbor-v<version>.zip`
 
 ## 已知问题
 
