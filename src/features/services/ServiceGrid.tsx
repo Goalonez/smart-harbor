@@ -18,6 +18,12 @@ import {
 import { useSaveServicesConfig } from '@/features/services/useSaveServicesConfig'
 import { ServiceCard } from './ServiceCard'
 import { preloadServiceIcons } from './iconRegistry'
+import {
+  DESKTOP_CARD_MIN_WIDTH_PX,
+  getCompactGroupWidth,
+  getDesktopCardWidth,
+  getDesktopColumnCount,
+} from './serviceGridLayout'
 import { useServices } from './useServices'
 
 interface DragOverState {
@@ -29,36 +35,6 @@ interface ContextMenuState {
   slug: string
   x: number
   y: number
-}
-
-const DESKTOP_SECTION_HORIZONTAL_PADDING_PX = 24
-const DESKTOP_LABEL_WIDTH_PX = 84
-const DESKTOP_SECTION_GAP_PX = 12
-const DESKTOP_GRID_HORIZONTAL_PADDING_PX = 12
-const DESKTOP_CARD_GAP_PX = 10
-const DESKTOP_CARD_MIN_WIDTH_PX = 130
-
-function getDesktopCardWidth(containerWidth: number, desktopColumnCount: number) {
-  const availableWidth =
-    containerWidth -
-    DESKTOP_SECTION_HORIZONTAL_PADDING_PX -
-    DESKTOP_LABEL_WIDTH_PX -
-    DESKTOP_SECTION_GAP_PX -
-    DESKTOP_GRID_HORIZONTAL_PADDING_PX -
-    Math.max(desktopColumnCount - 1, 0) * DESKTOP_CARD_GAP_PX
-
-  return Math.max(Math.floor(availableWidth / desktopColumnCount), DESKTOP_CARD_MIN_WIDTH_PX)
-}
-
-function getCompactGroupWidth(cardCount: number, desktopCardWidth: number) {
-  return (
-    DESKTOP_SECTION_HORIZONTAL_PADDING_PX +
-    DESKTOP_LABEL_WIDTH_PX +
-    DESKTOP_SECTION_GAP_PX +
-    DESKTOP_GRID_HORIZONTAL_PADDING_PX +
-    cardCount * desktopCardWidth +
-    Math.max(cardCount - 1, 0) * DESKTOP_CARD_GAP_PX
-  )
 }
 
 export function ServiceGrid() {
@@ -74,21 +50,6 @@ export function ServiceGrid() {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [editingSlug, setEditingSlug] = useState<string | null>(null)
   const [gridWidth, setGridWidth] = useState(0)
-  const [desktopColumnCount, setDesktopColumnCount] = useState(() => {
-    if (typeof window === 'undefined') {
-      return 0
-    }
-
-    if (window.innerWidth >= 1280) {
-      return 8
-    }
-
-    if (window.innerWidth >= 1024) {
-      return 6
-    }
-
-    return 0
-  })
   const [, setIconRenderVersion] = useState(0)
   const gridRef = useRef<HTMLDivElement | null>(null)
   const activeSystemConfig = systemConfig ?? defaultSystemConfig
@@ -153,28 +114,6 @@ export function ServiceGrid() {
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [contextMenu])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const updateDesktopColumnCount = () => {
-      setDesktopColumnCount((current) => {
-        const next =
-          window.innerWidth >= 1280 ? 8 : window.innerWidth >= 1024 ? 6 : 0
-
-        return current === next ? current : next
-      })
-    }
-
-    updateDesktopColumnCount()
-    window.addEventListener('resize', updateDesktopColumnCount)
-
-    return () => {
-      window.removeEventListener('resize', updateDesktopColumnCount)
-    }
-  }, [])
 
   useEffect(() => {
     const element = gridRef.current
@@ -310,10 +249,19 @@ export function ServiceGrid() {
 
   const menuLeft = contextMenu ? Math.min(contextMenu.x, window.innerWidth - 180) : 0
   const menuTop = contextMenu ? Math.min(contextMenu.y, window.innerHeight - 120) : 0
+  const desktopColumnCount = getDesktopColumnCount(gridWidth)
   const desktopCardWidth =
     desktopColumnCount > 0 && gridWidth > 0
       ? getDesktopCardWidth(gridWidth, desktopColumnCount)
       : DESKTOP_CARD_MIN_WIDTH_PX
+  const desktopGridColumnClass =
+    desktopColumnCount === 9
+      ? 'lg:grid-cols-9'
+      : desktopColumnCount === 8
+        ? 'lg:grid-cols-8'
+        : desktopColumnCount === 6
+          ? 'lg:grid-cols-6'
+          : 'lg:grid-cols-6 xl:grid-cols-8'
 
   return (
     <>
@@ -324,9 +272,7 @@ export function ServiceGrid() {
             typeof dragOver.serviceIndex === 'undefined'
           const compactGroupWidth = getCompactGroupWidth(group.services.length, desktopCardWidth)
           const canKeepSingleRow =
-            desktopColumnCount > 0 &&
-            group.services.length > 0 &&
-            compactGroupWidth <= gridWidth
+            desktopColumnCount > 0 && group.services.length > 0 && compactGroupWidth <= gridWidth
           const compactGridStyle = canKeepSingleRow
             ? ({
                 '--desktop-card-width': `${desktopCardWidth}px`,
@@ -349,7 +295,7 @@ export function ServiceGrid() {
                 </div>
 
                 <div
-                  className={`grid min-h-[76px] w-full flex-1 grid-cols-2 gap-2 rounded-[1.15rem] bg-background/34 p-1 transition sm:grid-cols-3 md:grid-cols-4 md:gap-2.5 md:p-1.5 ${canKeepSingleRow ? 'lg:w-fit lg:flex-none lg:grid-flow-col lg:grid-cols-none lg:auto-cols-[var(--desktop-card-width)]' : 'lg:grid-cols-6 xl:grid-cols-8'} ${isGroupDropTarget ? 'bg-primary/6 ring-1 ring-primary/10' : ''}`}
+                  className={`grid min-h-[76px] w-full flex-1 grid-cols-2 gap-2 rounded-[1.15rem] bg-background/34 p-1 transition sm:grid-cols-3 md:grid-cols-4 md:gap-2.5 md:p-1.5 ${canKeepSingleRow ? 'lg:w-fit lg:flex-none lg:grid-flow-col lg:grid-cols-none lg:auto-cols-[var(--desktop-card-width)]' : desktopGridColumnClass} ${isGroupDropTarget ? 'bg-primary/6 ring-1 ring-primary/10' : ''}`}
                   style={compactGridStyle}
                   onDragOver={(event) => {
                     if (!canDrag || !draggingSlug) {
